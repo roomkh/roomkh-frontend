@@ -57,7 +57,9 @@ roomkh-frontend/
 ├── README.md
 └── vite.config.js
 
-⚙️ Quick Start & Setup
+```
+
+## Quick Start & Setup
 1. Prerequisites
 Node.js: v18.x or higher
 
@@ -113,7 +115,7 @@ Open PRs targeting the dev branch.
 
 Require at least 1 peer code review before merging into dev.
 
-🎨 UI Standards & Figma Compliance
+## UI Standards & Figma Compliance
 UI implementation adheres to the provided Figma Specification.
 
 Colors, typography, and layout rules are central to tailwind.config.js.
