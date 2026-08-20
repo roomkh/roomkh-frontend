@@ -60,15 +60,12 @@ roomkh-frontend/
 └── vite.config.js
 ```
 
-<<<<<<< HEAD
----
-=======
 ```
 
 ## Quick Start & Setup
 1. Prerequisites
 Node.js: v18.x or higher
->>>>>>> a508777cca7bc10f5caf3f58b4cd8bc1b9012f71
+
 
 ## 🚀 Quick Start & Setup
 
@@ -88,9 +85,9 @@ cd roomkh-frontend
 
 # Install dependencies
 npm install
-<<<<<<< HEAD
+
 ```
-=======
+
 
 3. Environment Setup
 Create a .env file in the project root:
@@ -125,7 +122,6 @@ Open `http://localhost:5173` to view the application in your browser.
 
 ## 🤝 Collaboration & Git Workflow
 
-<<<<<<< HEAD
 To maintain code quality and prevent merge conflicts across team members:
 
 ### Branch Standards
