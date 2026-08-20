@@ -60,9 +60,6 @@ roomkh-frontend/
 └── vite.config.js
 ```
 
-<<<<<<< HEAD
----
-=======
 ```
 
 ## Quick Start & Setup
