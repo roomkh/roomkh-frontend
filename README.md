@@ -88,11 +88,6 @@ npm install
 
 ```
 
-
-3. Environment Setup
-Create a .env file in the project root:
->>>>>>> a508777cca7bc10f5caf3f58b4cd8bc1b9012f71
-
 ### 3. Environment Setup
 
 Create a `.env` file in the project root:
