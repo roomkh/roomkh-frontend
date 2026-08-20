@@ -60,7 +60,15 @@ roomkh-frontend/
 └── vite.config.js
 ```
 
+<<<<<<< HEAD
 ---
+=======
+```
+
+## Quick Start & Setup
+1. Prerequisites
+Node.js: v18.x or higher
+>>>>>>> a508777cca7bc10f5caf3f58b4cd8bc1b9012f71
 
 ## 🚀 Quick Start & Setup
 
@@ -80,7 +88,13 @@ cd roomkh-frontend
 
 # Install dependencies
 npm install
+<<<<<<< HEAD
 ```
+=======
+
+3. Environment Setup
+Create a .env file in the project root:
+>>>>>>> a508777cca7bc10f5caf3f58b4cd8bc1b9012f71
 
 ### 3. Environment Setup
 
@@ -111,6 +125,7 @@ Open `http://localhost:5173` to view the application in your browser.
 
 ## 🤝 Collaboration & Git Workflow
 
+<<<<<<< HEAD
 To maintain code quality and prevent merge conflicts across team members:
 
 ### Branch Standards
@@ -135,3 +150,15 @@ Create feature branches off `dev`:
 - UI implementation adheres to the provided Figma Specification.
 - Colors, typography, and layout rules are central to `tailwind.config.js`.
 - Form inputs are validated via JSON schema rules prior to API interaction.
+=======
+## Collaboration & Git Workflow
+To maintain code quality and prevent merge conflicts across team members:
+
+
+## UI Standards & Figma Compliance
+UI implementation adheres to the provided Figma Specification.
+
+Colors, typography, and layout rules are central to tailwind.config.js.
+
+Form inputs are validated via JSON schema rules prior to API interaction.
+>>>>>>> a508777cca7bc10f5caf3f58b4cd8bc1b9012f71
