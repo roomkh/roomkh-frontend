@@ -75,6 +75,7 @@ cd roomkh-frontend
 
 # Install dependencies
 npm install
+
 3. Environment Setup
 Create a .env file in the project root:
 
@@ -92,28 +93,9 @@ Bash
 npm run dev
 Open http://localhost:5173 to view the application in your browser.
 
- Collaboration & Git Workflow
+## Collaboration & Git Workflow
 To maintain code quality and prevent merge conflicts across team members:
 
-Branch Standards:
-
-Create feature branches off dev:
-
-feature/auth-login
-
-feature/admin-dashboard
-
-feature/seller-add-property
-
-fix/responsive-navbar
-
-Pull Requests (PRs):
-
-Do not commit directly to main or dev.
-
-Open PRs targeting the dev branch.
-
-Require at least 1 peer code review before merging into dev.
 
 ## UI Standards & Figma Compliance
 UI implementation adheres to the provided Figma Specification.
