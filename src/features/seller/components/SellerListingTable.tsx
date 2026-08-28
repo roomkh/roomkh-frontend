@@ -1,7 +1,8 @@
-import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Bed, Bath, Maximize, MoreVertical, Eye, MessageSquare } from "lucide-react";
 
-const SellerListingTable = ({ properties, activeTab, onTabChange, stats }) => {
+const SellerListingTable = ({ properties, activeTab, onTabChange, stats }: { properties: any[]; activeTab: string; onTabChange: (tab: string) => void; stats: any }) => {
+  const navigate = useNavigate();
   const tabs = [
     { name: "All", key: "ALL", count: stats?.total_properties || 0 },
     { name: "Active", key: "ACTIVE", count: stats?.active_count || 0 },
@@ -43,7 +44,7 @@ const SellerListingTable = ({ properties, activeTab, onTabChange, stats }) => {
         <div className="space-y-4">
           {filteredProperties.map((property) => {
             const coverImage =
-              property.images?.find((img) => img.is_cover)?.url ||
+              property.images?.find((img: any) => img.is_cover)?.url ||
               property.images?.[0]?.url ||
               property.cover_image_url ||
               "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80";
@@ -111,10 +112,14 @@ const SellerListingTable = ({ properties, activeTab, onTabChange, stats }) => {
                   </div>
 
                   <div className="flex items-center gap-2 pt-1">
-                    <button className="px-3 py-1 border border-blue-600 text-blue-600 hover:bg-blue-50 text-xs font-medium rounded-md transition-colors">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/properties/${property.id || property.slug}`)}
+                      className="px-3 py-1 border border-blue-600 text-blue-600 hover:bg-blue-50 text-xs font-medium rounded-md transition-colors"
+                    >
                       View Listing
                     </button>
-                    <button className="p-1 text-slate-400 hover:text-slate-600">
+                    <button type="button" className="p-1 text-slate-400 hover:text-slate-600">
                       <MoreVertical className="w-4 h-4" />
                     </button>
                   </div>

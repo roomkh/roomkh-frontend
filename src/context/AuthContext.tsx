@@ -61,12 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       const currentUser = await getCurrentUser();
-      const nextUser =
-        (currentUser as AuthResponse)?.user ||
-        (currentUser as AuthResponse)?.account ||
-        null;
-      persistUser(nextUser as User | null);
-      return currentUser as AuthResponse;
+      const nextUser = (currentUser as User) || null;
+      persistUser(nextUser);
+      return currentUser as unknown as AuthResponse;
     } catch {
       logoutUser();
       persistUser(null);

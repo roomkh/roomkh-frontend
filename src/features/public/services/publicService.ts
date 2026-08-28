@@ -1,4 +1,4 @@
-import type { HomeData, Location, FAQ, HelpTopic, Property, PropertyFilters, ListResponse, InquiryRequest, FavoriteResponse } from '../../types';
+import type { HomeData, Location, FAQ, HelpTopic, Property, PropertyFilters, ListResponse, InquiryRequest, FavoriteResponse } from '../../../types';
 import {
   getHomeData,
   getProperties,
@@ -11,7 +11,7 @@ import {
   addFavorite,
   removeFavorite,
   sendInquiry,
-} from '../../service/api';
+} from '../../../service/api';
 
 export const fetchHomeData = async (): Promise<HomeData> => {
   return getHomeData();

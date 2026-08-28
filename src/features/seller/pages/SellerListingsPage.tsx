@@ -18,7 +18,7 @@ const SellerListingsPage = () => {
           getSellerProperties(),
         ]);
         setStats(dashData);
-        setProperties(propData?.content || []);
+        setProperties(Array.isArray(propData) ? propData : []);
       } catch (err) {
         console.error("Failed to load listings:", err);
       } finally {

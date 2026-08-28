@@ -63,7 +63,7 @@ export default function PropertyDetailPage() {
     getPropertyById(id ?? '')
       .then((data) => {
         if (!isMounted) return;
-        const prop = data?.property || data;
+        const prop = data as Property | null;
         setProperty(prop);
         setIsSaved(prop?.is_saved || prop?.isSaved || false);
       })
@@ -90,35 +90,50 @@ export default function PropertyDetailPage() {
     };
   }, [id, t]);
 
-  // Dynamically build the full gallery directly from API property object
+  // Dynamically build a 4-image gallery directly from API property object
   const images = useMemo(() => {
     if (!property) return [];
 
-    // Extract cover photo from API
-    const cover =
-      getImageUrl(property?.cover_image_url) ||
-      getImageUrl(property?.coverImageUrl) ||
-      getImageUrl(property?.cover_image) ||
-      getImageUrl(property?.thumbnail) ||
+    // Collect image URLs from known API fields
+    const rawImages: Array<{ url: string; is_cover?: boolean; sort_order?: number }> = [];
+
+    if (Array.isArray(property.images)) {
+      for (const img of property.images) {
+        const url = getImageUrl(img);
+        if (url) rawImages.push({ url, is_cover: img.is_cover, sort_order: img.sort_order });
+      }
+    }
+
+    if (rawImages.length === 0 && Array.isArray(property.photos)) {
+      for (const img of property.photos) {
+        const url = getImageUrl(img);
+        if (url) rawImages.push({ url });
+      }
+    }
+
+    const coverFromApi =
+      getImageUrl(property.cover_image_url) ||
+      getImageUrl(property.coverImageUrl) ||
+      getImageUrl(property.cover_image) ||
+      getImageUrl(property.thumbnail) ||
       '';
 
-    // Extract additional image list from API
-    const rawImages = Array.isArray(property?.images)
-      ? property.images
-      : Array.isArray(property?.photos)
-      ? property.photos
-      : [];
+    if (coverFromApi && rawImages.length === 0) {
+      rawImages.push({ url: coverFromApi, is_cover: true, sort_order: 0 });
+    }
 
-    const extractedList = rawImages.map(getImageUrl).filter(Boolean);
+    rawImages.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
-    // Combine cover + images list without duplicates
-    const combined = [cover, ...extractedList].filter(Boolean);
-    const uniqueImages = Array.from(new Set(combined));
+    const uniqueImages = Array.from(new Set(rawImages.map((img) => img.url))).filter(Boolean);
 
-    // Fill missing grid slots using the cover image from API if fewer than 4 exist
-    const primaryFallback = uniqueImages[0] || '';
+    const cover = coverFromApi || uniqueImages[0] || '';
+    if (cover && !uniqueImages.includes(cover)) {
+      uniqueImages.unshift(cover);
+    }
+
     while (uniqueImages.length < 4) {
-      uniqueImages.push(primaryFallback);
+      const fallback = uniqueImages[0] || cover || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80';
+      uniqueImages.push(fallback);
     }
 
     return uniqueImages.slice(0, 4);
@@ -186,6 +201,8 @@ export default function PropertyDetailPage() {
   const lat = property.latitude || property.lat || 11.5564;
   const lng = property.longitude || property.lng || 104.9282;
 
+  const totalImageCount = Array.isArray(property.images) ? property.images.length : images.length;
+
   return (
     <div className="bg-gray-50 min-h-screen px-4 sm:px-6 lg:px-12 py-6 font-sans text-gray-900">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -233,30 +250,36 @@ export default function PropertyDetailPage() {
             </button>
           </div>
 
-          {/* Grid Layout: API Images Left, Specs Right */}
+          {/* Grid Layout: Responsive 4-Image Bento Grid Left, Specs Right */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            {/* Dynamic Gallery Left (Sourced exclusively from API) */}
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-2 h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden">
-               
-              {/* API Featured Cover Image */}
-              <div className="col-span-1 sm:col-span-2 h-48 sm:h-full bg-gray-100 overflow-hidden rounded-xl">
+            {/* Dynamic Gallery Left */}
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-2 rounded-2xl overflow-hidden h-[320px] sm:h-[380px] md:h-[420px]">
+              
+              {/* Featured Cover Image (Left Side) */}
+              <div className="sm:col-span-2 h-full bg-gray-100 overflow-hidden rounded-2xl relative group min-h-0">
                 <img 
                   src={images[0]} 
                   alt={title} 
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
 
-              {/* API Secondary Stacked Images */}
-              <div className="col-span-1 sm:col-span-1 grid grid-cols-3 sm:grid-rows-3 gap-2 h-24 sm:h-full min-h-0">
+              {/* 3 Secondary Stacked Images (Right Side Column) */}
+              <div className="hidden sm:grid grid-rows-3 gap-2 h-full min-h-0">
                 {[images[1], images[2], images[3]].map((image, index) => (
-                  <div key={index} className="w-full h-full min-h-0 bg-gray-100 overflow-hidden rounded-xl">
+                  <div key={index} className="relative h-full bg-gray-100 overflow-hidden rounded-2xl group min-h-0">
                     <img
                       src={image}
                       alt={`${title} ${index + 2}`}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
+                    {/* Badge Overlay for Extra Images */}
+                    {index === 2 && totalImageCount > 4 && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-sm font-bold backdrop-blur-[1px]">
+                        +{totalImageCount - 3}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

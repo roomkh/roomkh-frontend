@@ -1,5 +1,5 @@
 import axiosInstance from '../../../config/axios';
-import type { AuthResponse, LoginCredentials, RegisterData } from '../../../types';
+import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../../types';
 
 const TOKEN_KEYS = ['access_token', 'accessToken', 'token', 'jwt'];
 
@@ -57,8 +57,8 @@ export const registerUser = async (userData: RegisterData): Promise<AuthResponse
   return response;
 };
 
-export const getCurrentUser = async (): Promise<AuthResponse> => {
-  const response = (await axiosInstance.get('/auth/me')) as unknown as AuthResponse;
+export const getCurrentUser = async (): Promise<User> => {
+  const response = (await axiosInstance.get('/auth/me')) as unknown as User;
   return response;
 };
 

@@ -20,6 +20,7 @@ interface Faq {
   answer?: string;
   questionKey?: string;
   answerKey?: string;
+  topic_id?: number;
 }
 
 const DEFAULT_TOPICS = [
@@ -225,28 +226,28 @@ export default function HelpPage() {
             <h2 className="text-lg font-bold text-gray-900">{t('help.faqTitle')}</h2>
 
             <div className="divide-y divide-gray-100">
-              {faqs.map((faq) => {
+              {(selectedTopicId ? faqs.filter((faq) => faq.topic_id === selectedTopicId) : faqs).map((faq) => {
                 const isOpen = openFaqId === faq.id;
 
                 return (
                   <div key={faq.id} className="py-3.5">
-                    <button
-                      type="button"
-                      onClick={() => toggleFaq(faq.id)}
-                      className="w-full flex items-center justify-between text-left py-1 text-xs sm:text-sm font-semibold text-gray-800 hover:text-blue-600 transition cursor-pointer"
-                    >
-                      <span>{t(faq.questionKey ?? '')}</span>
-                      <ChevronDown
-                        className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-blue-600' : ''
-                        }`}
-                      />
-                    </button>
-                    {isOpen && (
-                      <p className="mt-2 text-xs text-gray-500 leading-relaxed pr-6 animate-in fade-in duration-150">
-                        {t(faq.answerKey ?? '')}
-                      </p>
-                    )}
+                     <button
+                       type="button"
+                       onClick={() => toggleFaq(faq.id)}
+                       className="w-full flex items-center justify-between text-left py-1 text-xs sm:text-sm font-semibold text-gray-800 hover:text-blue-600 transition cursor-pointer"
+                     >
+                       <span>{faq.questionKey ? t(faq.questionKey) : (faq.question || '')}</span>
+                       <ChevronDown
+                         className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${
+                           isOpen ? 'rotate-180 text-blue-600' : ''
+                         }`}
+                       />
+                     </button>
+                     {isOpen && (
+                       <p className="mt-2 text-xs text-gray-500 leading-relaxed pr-6 animate-in fade-in duration-150">
+                         {faq.answerKey ? t(faq.answerKey) : (faq.answer || '')}
+                       </p>
+                     )}
                   </div>
                 );
               })}

@@ -1,4 +1,4 @@
-import type { AdminSellerRequest, AdminUser, Property } from '../../types';
+import type { AdminSellerRequest, AdminUser, Property } from '../../../types';
 import {
   getAdminSellerRequests,
   reviewSellerRequest,
@@ -6,7 +6,7 @@ import {
   reviewAdminProperty,
   getAdminUsers,
   updateAdminUserStatus,
-} from '../../service/api';
+} from '../../../service/api';
 
 export const fetchAdminSellerRequests = async (status?: string): Promise<AdminSellerRequest[]> => {
   return getAdminSellerRequests(status);

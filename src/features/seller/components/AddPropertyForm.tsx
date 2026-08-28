@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { 
   Bed, 
   Bath, 
@@ -19,9 +19,10 @@ import {
   Sparkles, 
   Dog 
 } from "lucide-react";
+import SellerPropertyPreviewModal from "./SellerPropertyPreviewModal";
 
-const AddPropertyForm = ({ onSubmit, loading }) => {
-  const [formData, setFormData] = useState({
+const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: any) => void; loading: boolean }) => {
+  const [formData, setFormData] = useState<any>({
     title: "",
     property_type: "",
     purpose: "",
@@ -38,10 +39,11 @@ const AddPropertyForm = ({ onSubmit, loading }) => {
     floor: "",
     furnished: false,
     age_years: "",
-    amenity_codes: [],
+    amenity_codes: [] as string[],
   });
 
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState<any[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Available amenities grouped by category
   const amenityCategories = [
@@ -81,39 +83,40 @@ const AddPropertyForm = ({ onSubmit, loading }) => {
     },
   ];
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, checked } = target;
+    setFormData((prev: any) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const toggleAmenity = (code) => {
-    setFormData((prev) => {
+  const toggleAmenity = (code: string) => {
+    setFormData((prev: any) => {
       const exists = prev.amenity_codes.includes(code);
       return {
         ...prev,
         amenity_codes: exists
-          ? prev.amenity_codes.filter((c) => c !== code)
+          ? prev.amenity_codes.filter((c: string) => c !== code)
           : [...prev.amenity_codes, code],
       };
     });
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
     const newImages = files.map((file, index) => ({
       id: Date.now() + index,
       url: URL.createObjectURL(file),
       file,
       is_cover: images.length === 0 && index === 0,
     }));
-    setImages((prev) => [...prev, ...newImages].slice(0, 10));
+    setImages((prev: any[]) => [...prev, ...newImages].slice(0, 10));
   };
 
-  const removeImage = (id) => {
-    setImages((prev) => {
+  const removeImage = (id: number) => {
+    setImages((prev: any[]) => {
       const filtered = prev.filter((img) => img.id !== id);
       if (filtered.length > 0 && !filtered.some((img) => img.is_cover)) {
         filtered[0].is_cover = true;
@@ -122,13 +125,13 @@ const AddPropertyForm = ({ onSubmit, loading }) => {
     });
   };
 
-  const setCoverImage = (id) => {
-    setImages((prev) =>
+  const setCoverImage = (id: number) => {
+    setImages((prev: any[]) =>
       prev.map((img) => ({ ...img, is_cover: img.id === id }))
     );
   };
 
-  const handleSubmit = (actionType) => {
+  const handleSubmit = (actionType: string) => {
     const status = actionType === "PUBLISH" ? "PENDING" : "DRAFT";
     onSubmit({ ...formData, status, images });
   };
@@ -254,14 +257,14 @@ const AddPropertyForm = ({ onSubmit, loading }) => {
 
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">Description</label>
-            <textarea
-              rows="4"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Describe the property..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
+              <textarea
+                rows={4}
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Describe the property..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              ></textarea>
             <div className="text-right text-[10px] text-slate-400 mt-1">
               {formData.description.length} / 6500
             </div>
@@ -462,6 +465,7 @@ const AddPropertyForm = ({ onSubmit, loading }) => {
         </button>
         <button
           type="button"
+          onClick={() => setShowPreview(true)}
           className="px-5 py-2.5 border border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold text-xs rounded-lg transition-colors"
         >
           Preview
@@ -475,6 +479,14 @@ const AddPropertyForm = ({ onSubmit, loading }) => {
           {loading ? "Publishing..." : "Save & Publish"}
         </button>
       </div>
+
+      {showPreview && (
+        <SellerPropertyPreviewModal
+          property={formData}
+          images={images}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </div>
   );
 };
