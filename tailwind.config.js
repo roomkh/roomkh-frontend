@@ -5,6 +5,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        km: ['Kantumruy Pro', 'sans-serif'],
       },
     },
   },

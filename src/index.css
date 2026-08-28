@@ -4,6 +4,11 @@
 
 @theme {
   --font-sans: 'Inter', sans-serif;
+  --font-km: 'Kantumruy Pro', sans-serif;
+}
+
+html[lang="km"] {
+  --font-sans: 'Kantumruy Pro', sans-serif;
 }
 
 body {
