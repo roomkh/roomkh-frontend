@@ -2,6 +2,7 @@ import { createContext, useCallback, useEffect, useMemo, useState, useContext } 
 import type { ReactNode } from 'react';
 import {
   getCurrentUser,
+  googleLogin as googleLoginApi,
   loginUser,
   logoutUser,
   registerUser,
@@ -19,6 +20,7 @@ export interface AuthContextValue {
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<AuthResponse>;
   register: (userData: RegisterData) => Promise<AuthResponse>;
+  googleLogin: (credential: string) => Promise<AuthResponse>;
   logout: () => void;
   refreshUser: () => Promise<AuthResponse | null>;
 }
@@ -96,6 +98,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persistUser, refreshUser]
   );
 
+  const googleLogin = useCallback(
+    async (credential: string): Promise<AuthResponse> => {
+      const authData = await googleLoginApi(credential);
+      const nextUser =
+        (authData as AuthResponse)?.user ||
+        (authData as AuthResponse)?.account ||
+        null;
+
+      if (nextUser) {
+        persistUser(nextUser as User | null);
+      } else {
+        await refreshUser();
+      }
+
+      return authData;
+    },
+    [persistUser, refreshUser]
+  );
+
   const register = useCallback(
     async (userData: RegisterData): Promise<AuthResponse> => {
       const authData = await registerUser(userData);
@@ -127,10 +148,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: Boolean(user || localStorage.getItem('access_token')),
       login,
       register,
+      googleLogin,
       logout,
       refreshUser,
     }),
-    [user, loading, login, register, logout, refreshUser]
+    [user, loading, login, register, googleLogin, logout, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

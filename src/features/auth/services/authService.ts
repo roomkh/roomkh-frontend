@@ -57,6 +57,12 @@ export const registerUser = async (userData: RegisterData): Promise<AuthResponse
   return response;
 };
 
+export const googleLogin = async (credential: string): Promise<AuthResponse> => {
+  const response = (await axiosInstance.post('/auth/google', { credential })) as unknown as AuthResponse;
+  persistAuth(response);
+  return response;
+};
+
 export const getCurrentUser = async (): Promise<User> => {
   const response = (await axiosInstance.get('/auth/me')) as unknown as User;
   return response;

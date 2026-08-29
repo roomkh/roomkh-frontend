@@ -17,6 +17,7 @@ import {
   Headphones
 } from 'lucide-react';
 import SellPageSkeleton from '../../../components/skeletons/SellPageSkeleton';
+import placeholderImg from '../../../assets/images/placeholder-property.jpg';
 import { submitSellerRequest } from '../../seller/services/sellerService';
 import { useLanguage } from '../../../context/LanguageContext';
 
@@ -155,7 +156,7 @@ export default function SellPage() {
 
           <div className="lg:col-span-5">
             <img
-              src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80"
+              src={placeholderImg}
               alt="Modern Cityscape"
               className="rounded-xl object-cover h-64 w-full shadow-sm"
             />

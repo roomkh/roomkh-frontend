@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
 import { 
   Mail, 
   Lock, 
@@ -17,7 +18,6 @@ import { useLanguage } from '../../../context/LanguageContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
@@ -55,9 +55,26 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    window.location.href = 'https://roomkh-mock-api.onrender.com/api/v1/auth/google';
-  };
+  const { login, googleLogin: authGoogleLogin } = useAuth();
+
+  const handleGoogleSignIn = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const credential = (tokenResponse as { id_token?: string }).id_token;
+      if (!credential) {
+        setErrorMessage('Google sign-in failed: no credential received');
+        return;
+      }
+      try {
+        await authGoogleLogin(credential);
+        navigate('/');
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : 'Google sign-in failed');
+      }
+    },
+    onError: () => {
+      setErrorMessage('Google sign-in was cancelled or failed');
+    },
+  });
 
   return (
     <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-12 font-sans bg-white">
@@ -247,7 +264,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={handleGoogleSignIn}
+            onClick={() => handleGoogleSignIn()}
             className="w-full py-2.5 bg-white border border-gray-200 hover:bg-gray-50 active:scale-[0.98] text-gray-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2.5 cursor-pointer shadow-xs"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">

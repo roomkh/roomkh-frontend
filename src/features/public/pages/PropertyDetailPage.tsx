@@ -24,6 +24,7 @@ import PropertyDetailSkeleton from '../../../components/skeletons/PropertyDetail
 import PriceTag from '../../../components/property/PriceTag';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { getPropertyById, getSimilarProperties } from '../../../service/api';
+import { useFavorites } from '../../../hooks/useFavorites';
 import { useLanguage } from '../../../context/LanguageContext';
 import type { Owner, Property } from '../../../types';
 
@@ -53,7 +54,7 @@ export default function PropertyDetailPage() {
   const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isSaved, setIsSaved] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
     let isMounted = true;
@@ -65,7 +66,6 @@ export default function PropertyDetailPage() {
         if (!isMounted) return;
         const prop = data as Property | null;
         setProperty(prop);
-        setIsSaved(prop?.is_saved || prop?.isSaved || false);
       })
       .catch(() => {
         if (!isMounted) return;
@@ -238,15 +238,15 @@ export default function PropertyDetailPage() {
             </button>
             <button 
               type="button"
-              onClick={() => setIsSaved(!isSaved)}
+              onClick={() => property && toggleFavorite(property)}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                isSaved 
+                property && isFavorite(property.id) 
                   ? 'bg-red-50 text-red-600 border border-red-200' 
                   : 'bg-[#0070c0] text-white hover:bg-[#005da1] shadow-xs'
               }`}
             >
-              <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-red-600 text-red-600' : 'text-white'}`} />
-              <span>{isSaved ? t('propertyDetail.saved') : t('propertyDetail.save')}</span>
+              <Heart className={`w-3.5 h-3.5 ${property && isFavorite(property.id) ? 'fill-red-600 text-red-600' : 'text-white'}`} />
+              <span>{property && isFavorite(property.id) ? t('propertyDetail.saved') : t('propertyDetail.save')}</span>
             </button>
           </div>
 

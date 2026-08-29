@@ -1,15 +1,15 @@
-import { useState } from 'react';
 import type { MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Bed, Bath, Maximize, MapPin } from 'lucide-react';
 import Badge from '../ui/Badge';
 import { formatCurrency } from '../../utils/formatCurrency';
-import axiosInstance from '../../config/axios';
+import { useFavorites } from '../../hooks/useFavorites';
 import { useLanguage } from '../../context/LanguageContext';
 import type { Property, PropertyImage } from '../../types';
 
 export default function PropertyCard({ property }: { property: Property }) {
   const { t } = useLanguage();
+  const { isFavorite, toggleFavorite } = useFavorites();
   if (!property) return null;
 
   // Extract fields matching mock API's property card DTO schema
@@ -24,13 +24,12 @@ export default function PropertyCard({ property }: { property: Property }) {
     bathrooms = 1,
     size_sqm = 0,
     is_featured = false,
-    is_saved = false,
     cover_image_url,
     images = [],
   } = property;
   const propertyPath = `/properties/${id || property.slug}`;
 
-  const [saved, setSaved] = useState(is_saved);
+  const saved = isFavorite(id);
 
   // Fallback image handling: cover_image_url -> images array -> placeholder
   const displayImage =
@@ -42,24 +41,11 @@ export default function PropertyCard({ property }: { property: Property }) {
   // Format display location
   const displayLocation = address || province || t('property.defaultLocation');
 
-  // Toggle favorite with Mock API backend sync
-  const handleToggleFavorite = async (e: MouseEvent) => {
+  // Toggle favorite stored in localStorage
+  const handleToggleFavorite = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    const previousState = saved;
-    setSaved(!previousState);
-
-    try {
-      if (previousState) {
-        await axiosInstance.delete(`/properties/${id}/favorites`);
-      } else {
-        await axiosInstance.post(`/properties/${id}/favorites`);
-      }
-    } catch (error) {
-      console.error('Failed to update favorite status:', error);
-      setSaved(previousState); // Revert state on error
-    }
+    toggleFavorite(property);
   };
 
   return (

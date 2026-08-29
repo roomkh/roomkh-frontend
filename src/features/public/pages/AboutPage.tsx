@@ -11,6 +11,8 @@ import {
   Building2
 } from 'lucide-react';
 import AboutPageSkeleton from '../../../components/skeletons/AboutPageSkeleton';
+import heroImg from '../../../assets/images/hero.jpg';
+import placeholderImg from '../../../assets/images/placeholder-property.jpg';
 import { useLanguage } from '../../../context/LanguageContext';
 
 export default function AboutPage() {
@@ -48,7 +50,7 @@ export default function AboutPage() {
         {/* Golden Hour Sunset Cityscape Hero Image */}
         <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 h-64 sm:h-80 w-full">
           <img
-            src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80"
+            src={heroImg}
             alt="Phnom Penh Skyline"
             className="w-full h-full object-cover"
           />
@@ -182,7 +184,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center pt-4">
           <div className="md:col-span-4 rounded-2xl overflow-hidden shadow-sm border border-gray-100 h-48 sm:h-56">
             <img
-              src="https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=600&q=80"
+              src={placeholderImg}
               alt="Phnom Penh Riverside"
               className="w-full h-full object-cover"
             />

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, User, LogOut, Settings, Globe, LogIn, UserPlus } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut, Settings, Globe, LogIn, UserPlus, Heart } from 'lucide-react';
 import logo from '../../assets/images/logoImg-removebg-preview.png';
 import cambodiaFlag from '../../assets/images/cambodia_square_icon_64.png';
 import unitedKingdomFlag from '../../assets/images/united_kingdom_square_icon_64.png';
@@ -154,6 +154,14 @@ export default function Navbar() {
             )}
           </div>
 
+          <Link
+            to="/favorites"
+            className="relative p-2 rounded-xl hover:bg-gray-100/80 active:scale-95 transition-all duration-150 cursor-pointer text-gray-600 hover:text-red-500"
+            aria-label={t('favorites.title')}
+          >
+            <Heart className="w-4 h-4" />
+          </Link>
+
           {isAuthenticated ? (
             <div className="relative border-l border-gray-200 pl-3">
               <button
@@ -256,12 +264,13 @@ export default function Navbar() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+                className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
                   isActive(item.to)
                     ? 'bg-blue-50 text-blue-600 font-bold'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
+                {item.icon && <item.icon className="w-3.5 h-3.5" />}
                 {t(item.labelKey)}
               </Link>
             ))}
@@ -304,6 +313,15 @@ export default function Navbar() {
                 ))}
               </div>
             </div>
+
+            <Link
+              to="/favorites"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              <Heart className="w-3.5 h-3.5 text-red-500" />
+              <span>{t('favorites.title')}</span>
+            </Link>
 
             {isAuthenticated ? (
               <div className="flex items-center justify-between pt-2">

@@ -17,6 +17,7 @@ const PropertyListPage = lazy(() => import('../features/public/pages/PropertyLis
 const PropertyDetailPage = lazy(() => import('../features/public/pages/PropertyDetailPage'));
 const AboutPage = lazy(() => import('../features/public/pages/AboutPage'));
 const HelpPage = lazy(() => import('../features/public/pages/HelpPage'));
+const FavoritesPage = lazy(() => import('../features/public/pages/FavoritesPage'));
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage'));
 const RegisterPage = lazy(() => import('../features/auth/pages/RegisterPage'));
 const SellerDashboard = lazy(() => import('../features/seller/pages/SellPage'));
@@ -44,6 +45,7 @@ export default function AppRoutes() {
       <Route path="/about" element={withSkeleton(AboutPage, AboutPageSkeleton)} />
       
       <Route path="/help" element={withSkeleton(HelpPage, HelpPageSkeleton)} />
+      <Route path="/favorites" element={withSkeleton(FavoritesPage, LoadingSpinner)} />
       <Route path="/login" element={withSkeleton(LoginPage, LoadingSpinner)} />
       <Route path="/register" element={withSkeleton(RegisterPage, LoadingSpinner)} />
 

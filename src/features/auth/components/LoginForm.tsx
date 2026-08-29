@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../../context/AuthContext';
 import { useLanguage } from '../../../context/LanguageContext';
 import type { AuthResponse } from '../../../types';
@@ -12,7 +13,7 @@ export default function LoginForm({
   onSuccess?: (data: AuthResponse) => void;
 }) {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, googleLogin: authGoogleLogin } = useAuth();
   const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
@@ -57,9 +58,24 @@ export default function LoginForm({
     }
   };
 
-  const handleGoogleSignIn = () => {
-    window.location.href = 'https://roomkh-mock-api.onrender.com/api/v1/auth/google';
-  };
+  const handleGoogleSignIn = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const credential = (tokenResponse as { id_token?: string }).id_token;
+      if (!credential) {
+        setErrorMessage('Google sign-in failed: no credential received');
+        return;
+      }
+      try {
+        await authGoogleLogin(credential);
+        navigate('/');
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : 'Google sign-in failed');
+      }
+    },
+    onError: () => {
+      setErrorMessage('Google sign-in was cancelled or failed');
+    },
+  });
 
   return (
     <div className="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-gray-100 space-y-6 font-sans">
@@ -167,7 +183,7 @@ export default function LoginForm({
       {/* Google OAuth Button */}
       <button
         type="button"
-        onClick={handleGoogleSignIn}
+        onClick={() => handleGoogleSignIn()}
         className="w-full py-2.5 bg-white border border-gray-200 hover:bg-gray-50 active:scale-[0.98] text-gray-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2.5 cursor-pointer shadow-xs"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
