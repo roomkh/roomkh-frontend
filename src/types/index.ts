@@ -87,6 +87,10 @@ export interface Owner {
   response_rate?: number;
   response_time?: string;
   member_since?: string;
+  plan?: string;
+  properties_count?: number;
+  status?: string;
+  joined_date?: string;
 }
 
 export interface PropertyFilters {
@@ -289,13 +293,73 @@ export interface AdminSellerRequest {
 
 export interface AdminUser {
   id: number;
+  user_id?: string;
   full_name: string;
+  name?: string;
   email: string;
   phone_number: string;
+  phone?: string;
   role: string;
   seller_status: string | null;
   auth_provider: string;
   account_status?: string;
+  status?: string;
+  joined_date?: string;
+  avatar_url?: string;
+}
+
+export interface AdminDashboardStats {
+  cards: {
+    total_users: number;
+    seekers_count: number;
+    owners_count: number;
+    user_growth: number;
+    total_owners: number;
+    pending_owners: number;
+    churn_rate: number;
+    owner_growth: number;
+    total_listings: number;
+    pending_listings: number;
+    active_percentage: number;
+    monthly_revenue: number;
+    last_month_revenue: number;
+  };
+  platform_growth_chart: {
+    labels: string[];
+    user_signups: number[];
+    listings_added: number[];
+  };
+  revenue_source_chart: Array<{
+    name: string;
+    value: number;
+  }>;
+}
+
+export interface AdminUserStats {
+  total?: number;
+  active?: number;
+  pending?: number;
+  inactive?: number;
+  seekers_count?: number;
+  owners_count?: number;
+  agents_count?: number;
+  [key: string]: unknown;
+}
+
+export interface AdminOwnerStats {
+  total?: number;
+  active?: number;
+  pending?: number;
+  inactive?: number;
+  [key: string]: unknown;
+}
+
+export interface AdminPropertyStats {
+  total?: number;
+  active?: number;
+  pending?: number;
+  inactive?: number;
+  [key: string]: unknown;
 }
 
 export interface FavoriteResponse {

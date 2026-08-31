@@ -1,7 +1,11 @@
 import axiosInstance from '../config/axios';
 import type {
+  AdminDashboardStats,
+  AdminOwnerStats,
+  AdminPropertyStats,
   AdminSellerRequest,
   AdminUser,
+  AdminUserStats,
   AuthResponse,
   FavoriteResponse,
   FAQ,
@@ -13,6 +17,7 @@ import type {
   InquiryResponse,
   ListResponse,
   Location,
+  Owner,
   Property,
   PropertyCard,
   PropertyFilters,
@@ -205,17 +210,63 @@ export const getAdminSellerRequests = async (status?: string): Promise<AdminSell
 export const reviewSellerRequest = async (requestId: number | string, data: { status: string; admin_note?: string }): Promise<AdminSellerRequest> =>
   axiosInstance.patch(`/admin/seller-requests/${requestId}`, data);
 
-export const getAdminProperties = async (status?: string): Promise<Property[]> => {
-  const params: Record<string, unknown> = {};
-  if (status) params.status = status;
-  return axiosInstance.get('/admin/properties', { params });
+export const getAdminProperties = async (params?: { page?: number; size?: number; status?: string; type?: string; city?: string; search?: string }): Promise<Property[]> => {
+  const queryParams: Record<string, unknown> = {
+    page: params?.page || 1,
+    size: params?.size || 10,
+  };
+  if (params?.search) queryParams.search = params.search;
+  if (params?.status && params.status !== 'All Status') queryParams.status = params.status;
+  if (params?.type && params.type !== 'All Types') queryParams.type = params.type;
+  if (params?.city && params.city !== 'All Cities') queryParams.city = params.city;
+  return axiosInstance.get('/admin/properties', { params: queryParams });
 };
 
 export const reviewAdminProperty = async (propertyId: number | string, data: { status: string; admin_note?: string }): Promise<Property> =>
   axiosInstance.patch(`/admin/properties/${propertyId}/review`, data);
 
-export const getAdminUsers = async (): Promise<AdminUser[]> =>
-  axiosInstance.get('/admin/users');
+export const getAdminUsers = async (params?: { page?: number; size?: number; search?: string; role?: string; status?: string }): Promise<AdminUser[]> => {
+  const queryParams: Record<string, unknown> = {
+    page: params?.page || 1,
+    size: params?.size || 10,
+  };
+  if (params?.search) queryParams.search = params.search;
+  if (params?.role && params.role !== 'All Roles') queryParams.role = params.role;
+  if (params?.status && params.status !== 'All Status') queryParams.status = params.status;
+  return axiosInstance.get('/admin/users', { params: queryParams });
+};
 
 export const updateAdminUserStatus = async (userId: number | string, status: string): Promise<AdminUser> =>
   axiosInstance.patch(`/admin/users/${userId}/status`, { status });
+
+export const getAdminDashboardStats = async (): Promise<AdminDashboardStats> =>
+  axiosInstance.get('/admin/dashboard/stats');
+
+export const getAdminUsersStats = async (): Promise<AdminUserStats> =>
+  axiosInstance.get('/admin/users/stats');
+
+export const getAdminOwnersStats = async (): Promise<AdminOwnerStats> =>
+  axiosInstance.get('/admin/owners/stats');
+
+export const getAdminPropertiesStats = async (): Promise<AdminPropertyStats> =>
+  axiosInstance.get('/admin/properties/stats');
+
+export const getAdminOwners = async (params?: { page?: number; size?: number; search?: string; status?: string; plan?: string }): Promise<Owner[]> => {
+  const queryParams: Record<string, unknown> = {
+    page: params?.page || 1,
+    size: params?.size || 10,
+  };
+  if (params?.search) queryParams.search = params.search;
+  if (params?.status && params.status !== 'All Status') queryParams.status = params.status;
+  if (params?.plan && params.plan !== 'All Plans') queryParams.plan = params.plan;
+  return axiosInstance.get('/admin/owners', { params: queryParams });
+};
+
+export const getAdminPropertyById = async (propertyId: number | string): Promise<Property> =>
+  axiosInstance.get(`/admin/properties/${propertyId}`);
+
+export const exportAdminProperties = async (params?: { status?: string }): Promise<Blob> => {
+  const queryParams: Record<string, unknown> = {};
+  if (params?.status) queryParams.status = params.status;
+  return axiosInstance.get('/admin/properties/export', { params: queryParams, responseType: 'blob' });
+};

@@ -144,7 +144,7 @@ const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: any) => void;
         {/* Left Column: Basic Details */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 space-y-4 shadow-sm">
           <div className="flex items-center gap-2 border-b border-gray-100 pb-3 font-bold text-slate-800 text-sm">
-            <span className="text-blue-600">📋</span> Basic Details
+             Basic Details
           </div>
 
           <div>

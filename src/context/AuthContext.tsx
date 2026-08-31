@@ -37,11 +37,13 @@ const getStoredUser = (): User | null => {
   }
 };
 
+const hasActiveSession = (): boolean => {
+  return Boolean(localStorage.getItem('access_token') && localStorage.getItem('auth_user'));
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(getStoredUser);
-  const [loading, setLoading] = useState<boolean>(
-    Boolean(localStorage.getItem('access_token'))
-  );
+  const [loading, setLoading] = useState<boolean>(hasActiveSession());
 
   const persistUser = useCallback((nextUser: User | null) => {
     setUser(nextUser);
@@ -54,7 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = useCallback(async (): Promise<AuthResponse | null> => {
     const token = localStorage.getItem('access_token');
-    if (!token) {
+    const storedUser = getStoredUser();
+
+    if (!token || !storedUser) {
+      logoutUser();
       persistUser(null);
       setLoading(false);
       return null;
@@ -63,7 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       const currentUser = await getCurrentUser();
-      const nextUser = (currentUser as User) || null;
+      const apiUser = (currentUser as User) || null;
+      const nextUser = apiUser || storedUser;
       persistUser(nextUser);
       return currentUser as unknown as AuthResponse;
     } catch {
@@ -76,7 +82,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [persistUser]);
 
   useEffect(() => {
-    refreshUser();
+    if (hasActiveSession()) {
+      refreshUser();
+    } else {
+      logoutUser();
+      persistUser(null);
+      setLoading(false);
+    }
   }, [refreshUser]);
 
   const login = useCallback(
@@ -145,14 +157,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       loading,
-      isAuthenticated: Boolean(user || localStorage.getItem('access_token')),
+      isAuthenticated: Boolean(user && localStorage.getItem('access_token')),
       login,
       register,
       googleLogin,
       logout,
       refreshUser,
     }),
-    [user, loading, login, register, googleLogin, logout, refreshUser]
+    [user, loading, login, googleLogin, register, logout, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -104,7 +104,17 @@ export default function Navbar() {
                 isActive('/seller') ? 'text-blue-600 font-bold' : 'hover:text-blue-600'
               }`}
             >
-              Seller Dashboard
+               Dashboard
+            </Link>
+          )}
+          {user?.role === 'ADMIN' && (
+            <Link
+              to="/admin"
+              className={`relative py-1 transition-colors duration-150 ${
+                isActive('/admin') ? 'text-blue-600 font-bold' : 'hover:text-blue-600'
+              }`}
+            >
+              Admin
             </Link>
           )}
         </nav>
@@ -270,8 +280,7 @@ export default function Navbar() {
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                {item.icon && <item.icon className="w-3.5 h-3.5" />}
-                {t(item.labelKey)}
+              {t(item.labelKey)}
               </Link>
             ))}
             {(user?.seller_status === 'APPROVED' || user?.sellerStatus === 'APPROVED') && (
@@ -285,6 +294,19 @@ export default function Navbar() {
                 }`}
               >
                 Seller Dashboard
+              </Link>
+            )}
+            {user?.role === 'ADMIN' && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+                  isActive('/admin')
+                    ? 'bg-blue-50 text-blue-600 font-bold'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Admin Panel
               </Link>
             )}
           </nav>
