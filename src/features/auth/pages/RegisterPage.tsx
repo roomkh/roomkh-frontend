@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import loginBg from '../../../assets/images/logi-bg.jpg';
 import { useGoogleLogin } from '@react-oauth/google';
 import { 
   User, 
@@ -101,9 +102,9 @@ export default function RegisterPage() {
       {/* Left Feature Column */}
       <div className="hidden lg:flex lg:col-span-7 relative bg-gray-50 flex-col justify-between p-12 overflow-hidden border-r border-gray-100">
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center opacity-15 filter grayscale"
+          className="absolute inset-0 z-0 bg-cover bg-center opacity- filter grayscale"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80')`
+            backgroundImage: `url(${loginBg})`
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-white/90 via-white/70 to-blue-50/40 z-0" />
