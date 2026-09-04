@@ -34,7 +34,7 @@ export default function SettingsPage() {
 
       setSuccessMsg('Settings updated successfully!');
       setTimeout(() => setSuccessMsg(''), 4000);
-    } catch (err: any) {
+    } catch {
       setErrorMsg('Failed to save settings. Please try again.');
     } finally {
       setSavingSettings(false);
@@ -71,8 +71,11 @@ export default function SettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
       setTimeout(() => setSuccessMsg(''), 4000);
-    } catch (err: any) {
-      setErrorMsg(err?.response?.data?.message || 'Failed to update password.');
+    } catch (err: unknown) {
+      setErrorMsg(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          'Failed to update password.'
+      );
     } finally {
       setUpdatingPassword(false);
     }

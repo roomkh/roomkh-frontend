@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Bed, Bath, Maximize, MoreVertical, Eye, MessageSquare } from "lucide-react";
+import type { Property, SellerDashboard, PropertyImage } from '../../../types';
 
-const SellerListingTable = ({ properties, activeTab, onTabChange, stats }: { properties: any[]; activeTab: string; onTabChange: (tab: string) => void; stats: any }) => {
+const SellerListingTable = ({ properties, activeTab, onTabChange, stats }: { properties: Property[]; activeTab: string; onTabChange: (tab: string) => void; stats: SellerDashboard | null }) => {
   const navigate = useNavigate();
   const tabs = [
     { name: "All", key: "ALL", count: stats?.total_properties || 0 },
@@ -44,7 +45,7 @@ const SellerListingTable = ({ properties, activeTab, onTabChange, stats }: { pro
         <div className="space-y-4">
           {filteredProperties.map((property) => {
             const coverImage =
-              property.images?.find((img: any) => img.is_cover)?.url ||
+              property.images?.find((img: PropertyImage) => img.is_cover)?.url ||
               property.images?.[0]?.url ||
               property.cover_image_url ||
               "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80";

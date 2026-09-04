@@ -13,36 +13,38 @@ export default function PropertyGrid({ filters = {} }: { filters?: PropertyFilte
   const { t } = useLanguage();
 
   useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    setError(null);
-    setSlowNotice(false);
+    Promise.resolve().then(() => {
+      setLoading(true);
+      setError(null);
+      setSlowNotice(false);
 
-    const timer = setTimeout(() => {
-      if (loading) setSlowNotice(true);
-    }, 3000);
+      let isMounted = true;
+      const timer = setTimeout(() => {
+        if (isMounted) setSlowNotice(true);
+      }, 3000);
 
-    getProperties(filters)
-      .then((data) => {
-        if (isMounted) {
-          const list = Array.isArray(data) ? (data as Property[]) : data?.content || [];
-          setProperties(list);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setError(t('property.fetchError'));
-          setLoading(false);
-        }
-      })
-      .finally(() => clearTimeout(timer));
+      getProperties(filters)
+        .then((data) => {
+          if (isMounted) {
+            const list = Array.isArray(data) ? (data as Property[]) : data?.content || [];
+            setProperties(list);
+            setLoading(false);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setError(t('property.fetchError'));
+            setLoading(false);
+          }
+        })
+        .finally(() => clearTimeout(timer));
 
-    return () => {
-      isMounted = false;
-      clearTimeout(timer);
-    };
-  }, [JSON.stringify(filters)]);
+      return () => {
+        isMounted = false;
+        clearTimeout(timer);
+      };
+    });
+  }, [filters, t]);
 
   if (loading) {
     return (

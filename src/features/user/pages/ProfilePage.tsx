@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { Mail, Phone, User, Shield, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { updateUserProfile } from '../services/userService';
@@ -8,21 +8,13 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   
   // Local form state
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState(() => user?.full_name || user?.fullName || user?.name || '');
+  const [phone, setPhone] = useState(() => user?.phone || user?.phone_number || '');
 
   // UI state
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-
-  // Populate local form state when user changes or edit mode opens
-  useEffect(() => {
-    if (user) {
-      setFullName(user.full_name || user.fullName || user.name || '');
-      setPhone(user.phone || user.phone_number || '');
-    }
-  }, [user, isEditing]);
 
   if (!user) {
     return (
@@ -63,10 +55,11 @@ export default function ProfilePage() {
 
       setSuccessMsg('Profile updated successfully!');
       setIsEditing(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to update profile:', err);
       setErrorMsg(
-        err?.response?.data?.message || 'Failed to update profile. Please try again.'
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          'Failed to update profile. Please try again.'
       );
     } finally {
       setSaving(false);

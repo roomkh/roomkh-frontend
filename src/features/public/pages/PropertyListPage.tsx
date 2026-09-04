@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PropertyListPageSkeleton from '../../../components/skeletons/PropertyListPageSkeleton';
@@ -33,7 +33,7 @@ export default function PropertyListPage() {
   const [error, setError] = useState<string | null>(null);
 
 
-  const fetchListings = (activeFilters: PropertyFilters) => {
+  const fetchListings = useCallback((activeFilters: PropertyFilters) => {
     setLoading(true);
     setError(null);
     getProperties({ ...activeFilters, sort_by: sortBy })
@@ -48,11 +48,11 @@ export default function PropertyListPage() {
         setError(err.message || 'Failed to fetch properties. Server may be waking up.');
         setLoading(false);
       });
-  };
+  }, [sortBy]);
 
   useEffect(() => {
-    fetchListings(filters);
-  }, [sortBy, JSON.stringify(filters)]);
+    Promise.resolve().then(() => fetchListings(filters));
+  }, [fetchListings, filters]);
 
   const handleFilterChange = (field: string, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));

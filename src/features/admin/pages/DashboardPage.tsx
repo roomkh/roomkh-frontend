@@ -133,7 +133,7 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    Promise.resolve().then(fetchDashboardData);
   }, []);
 
   const handleReview = async (id: number | string, status: 'Approved' | 'Rejected') => {

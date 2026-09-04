@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import type { FormEvent } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
+import illustration from '../../../assets/images/customer-support-flat-illustration_23-2148889374.avif';
 import {
   Search,
   Rocket,
@@ -90,20 +91,17 @@ const INITIAL_FAQS = [
 
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [faqs, setFaqs] = useState<Faq[]>(INITIAL_FAQS);
-  const [openFaqId, setOpenFaqId] = useState<number | null>(null);
+  const [allFaqs, setAllFaqs] = useState<Faq[]>(INITIAL_FAQS);
   const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
 
-  // Fetch topics and FAQs from API if available
   useEffect(() => {
-    setLoading(true);
     axiosInstance
       .get('/faqs')
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          setFaqs(data);
+          setAllFaqs(data);
         }
         setLoading(false);
       })
@@ -112,22 +110,35 @@ export default function HelpPage() {
       });
   }, []);
 
-  const toggleFaq = (id: number) => {
-    setOpenFaqId((prev) => (prev === id ? null : id));
+  const getQuestionText = useCallback((faq: Faq) => (faq.questionKey ? t(faq.questionKey) : (faq.question || '')), [t]);
+  const getAnswerText = useCallback((faq: Faq) => (faq.answerKey ? t(faq.answerKey) : (faq.answer || '')), [t]);
+
+  const filteredFaqs = useMemo(() => {
+    const trimmed = searchQuery.trim().toLowerCase();
+    let result = allFaqs;
+
+    if (selectedTopicId) {
+      result = result.filter((faq) => faq.topic_id === selectedTopicId);
+    }
+
+    if (trimmed) {
+      result = result.filter(
+        (faq) =>
+          getQuestionText(faq).toLowerCase().includes(trimmed) ||
+          getAnswerText(faq).toLowerCase().includes(trimmed)
+      );
+    }
+
+    return result;
+  }, [allFaqs, searchQuery, selectedTopicId, getQuestionText, getAnswerText]);
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
   };
 
   const handleSearchSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) {
-      setFaqs(INITIAL_FAQS);
-      return;
-    }
-    const filtered = INITIAL_FAQS.filter(
-      (faq) =>
-        faq.questionKey?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        faq.answerKey?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFaqs(filtered);
   };
 
   if (loading) {
@@ -162,7 +173,7 @@ export default function HelpPage() {
                   placeholder={t('help.searchPlaceholder')}
                   className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-800 outline-none focus:border-blue-600 focus:bg-white transition"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchChange}
                 />
               </div>
               <button
@@ -177,7 +188,7 @@ export default function HelpPage() {
           {/* Support Agent Graphic */}
           <div className="lg:col-span-5 flex justify-center">
             <img
-              src="https://img.freepik.com/free-vector/customer-support-flat-illustration_23-2148889374.jpg"
+              src={illustration}
               alt="Customer Support Illustration"
               className="max-h-56 w-auto object-contain"
             />
@@ -226,29 +237,20 @@ export default function HelpPage() {
             <h2 className="text-lg font-bold text-gray-900">{t('help.faqTitle')}</h2>
 
             <div className="divide-y divide-gray-100">
-              {(selectedTopicId ? faqs.filter((faq) => faq.topic_id === selectedTopicId) : faqs).map((faq) => {
-                const isOpen = openFaqId === faq.id;
+              {filteredFaqs.map((faq) => {
+                const questionText = getQuestionText(faq);
+                const answerText = getAnswerText(faq);
 
                 return (
-                  <div key={faq.id} className="py-3.5">
-                     <button
-                       type="button"
-                       onClick={() => toggleFaq(faq.id)}
-                       className="w-full flex items-center justify-between text-left py-1 text-xs sm:text-sm font-semibold text-gray-800 hover:text-blue-600 transition cursor-pointer"
-                     >
-                       <span>{faq.questionKey ? t(faq.questionKey) : (faq.question || '')}</span>
-                       <ChevronDown
-                         className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${
-                           isOpen ? 'rotate-180 text-blue-600' : ''
-                         }`}
-                       />
-                     </button>
-                     {isOpen && (
-                       <p className="mt-2 text-xs text-gray-500 leading-relaxed pr-6 animate-in fade-in duration-150">
-                         {faq.answerKey ? t(faq.answerKey) : (faq.answer || '')}
-                       </p>
-                     )}
-                  </div>
+                  <details key={faq.id} className="py-3.5 group">
+                    <summary className="w-full flex items-center justify-between text-left py-1 text-xs sm:text-sm font-semibold text-gray-800 hover:text-blue-600 transition cursor-pointer list-none">
+                      <span>{questionText}</span>
+                      <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 group-open:rotate-180 text-blue-600" />
+                    </summary>
+                    <p className="mt-2 text-xs text-gray-500 leading-relaxed pr-6">
+                      {answerText}
+                    </p>
+                  </details>
                 );
               })}
             </div>

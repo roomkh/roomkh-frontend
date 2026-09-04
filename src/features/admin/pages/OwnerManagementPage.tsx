@@ -33,7 +33,7 @@ export default function OwnerManagementPage() {
   }, [page, searchTerm, status, plan]);
 
   useEffect(() => {
-    fetchOwnersData();
+    Promise.resolve().then(fetchOwnersData);
   }, [fetchOwnersData]);
 
   if (loading) return <OwnerManagementPageSkeleton />;

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getSellerDashboard, getSellerProperties } from "../services/sellerService";
 import SellerListingTable from "../components/SellerListingTable";
+import type { Property, SellerDashboard } from '../../../types';
 import { 
   Loader2, 
   Home, 
@@ -11,25 +12,9 @@ import {
   RefreshCw 
 } from "lucide-react";
 
-interface SellerStats {
-  total_properties?: number;
-  active_count?: number;
-  pending_count?: number;
-  draft_count?: number;
-}
-
-interface Property {
-  id: string | number;
-  title: string;
-  status: "ACTIVE" | "PENDING" | "DRAFT" | string;
-  price?: number;
-  created_at?: string;
-  [key: string]: any;
-}
-
 const SellerListingsPage = () => {
   const [activeTab, setActiveTab] = useState<string>("ALL");
-  const [stats, setStats] = useState<SellerStats | null>(null);
+  const [stats, setStats] = useState<SellerDashboard | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +38,7 @@ const SellerListingsPage = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    Promise.resolve().then(fetchData);
   }, []);
 
   // Filter listings based on active status tab

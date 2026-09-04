@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Upload, X, Star } from "lucide-react";
 
-const ImageUploader = ({ images = [], onAddImage, onDeleteImage, onSetCover }: { images: any[]; onAddImage: (img: any) => void; onDeleteImage: (index: number) => void; onSetCover: (index: number) => void }) => {
+interface ImageItem {
+  url: string;
+  is_cover?: boolean;
+}
+
+const ImageUploader = ({ images = [], onAddImage, onDeleteImage, onSetCover }: { images: ImageItem[]; onAddImage: (img: ImageItem) => void; onDeleteImage: (index: number) => void; onSetCover: (index: number) => void }) => {
   const [imageUrlInput, setImageUrlInput] = useState("");
 
   const handleAdd = (e: React.FormEvent) => {
@@ -38,7 +43,7 @@ const ImageUploader = ({ images = [], onAddImage, onDeleteImage, onSetCover }: {
       {/* Image Preview Grid */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-          {images.map((img: any, index: number) => (
+          {images.map((img, index: number) => (
             <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 bg-slate-50">
               <img src={img.url} alt="Property preview" className="w-full h-24 object-cover" />
               

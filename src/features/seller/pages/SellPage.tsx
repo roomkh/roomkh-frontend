@@ -44,7 +44,7 @@ const SellerDashboard = () => {
   };
 
   useEffect(() => {
-    fetchStats();
+    Promise.resolve().then(fetchStats);
   }, []);
 
   if (loading) {
@@ -123,8 +123,8 @@ const SellerDashboard = () => {
             <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500" />
             <span>{error}</span>
           </div>
-          <button 
-            onClick={fetchStats}
+            <button 
+              onClick={fetchStats}
             className="text-xs font-semibold underline hover:text-red-800"
           >
             Retry

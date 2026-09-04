@@ -18,5 +18,16 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // Context providers legitimately export a component alongside custom hooks
+      // and context objects, so whitelist those named exports for fast refresh.
+      'react-refresh/only-export-components': [
+        'error',
+        {
+          allowConstantExport: true,
+          allowExportNames: ['AuthContext', 'useAuth', 'LanguageContext', 'useLanguage', 'useFavorites'],
+        },
+      ],
+    },
   },
 ])

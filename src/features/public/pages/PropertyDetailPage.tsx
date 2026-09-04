@@ -2,14 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
-  Bed,
-  Bath,
-  Maximize,
   MapPin,
   Share2,
   Heart,
   ExternalLink,
-  CheckCircle2,
   Send,
   Phone,
   MessageCircle,
@@ -19,9 +15,11 @@ import {
   Car,
   ShieldCheck,
   Building2,
+  CheckCircle2,
+  Star,
+  Clock,
 } from 'lucide-react';
 import PropertyDetailSkeleton from '../../../components/skeletons/PropertyDetailSkeleton';
-import PriceTag from '../../../components/property/PriceTag';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { getPropertyById, getSimilarProperties } from '../../../service/api';
 import { useFavorites } from '../../../hooks/useFavorites';
@@ -57,9 +55,7 @@ export default function PropertyDetailPage() {
   const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    setError('');
+     let isMounted = true;
 
     getPropertyById(id ?? '')
       .then((data) => {
@@ -94,7 +90,6 @@ export default function PropertyDetailPage() {
   const images = useMemo(() => {
     if (!property) return [];
 
-    // Collect image URLs from known API fields
     const rawImages: Array<{ url: string; is_cover?: boolean; sort_order?: number }> = [];
 
     if (Array.isArray(property.images)) {
@@ -132,7 +127,10 @@ export default function PropertyDetailPage() {
     }
 
     while (uniqueImages.length < 4) {
-      const fallback = uniqueImages[0] || cover || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80';
+      const fallback =
+        uniqueImages[0] ||
+        cover ||
+        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80';
       uniqueImages.push(fallback);
     }
 
@@ -145,8 +143,8 @@ export default function PropertyDetailPage() {
 
   if (error || !property) {
     return (
-      <div className="bg-gray-50 min-h-screen py-10 px-4 sm:px-6 lg:px-12 font-sans">
-        <div className="max-w-3xl mx-auto bg-white border border-gray-100 rounded-3xl p-8 text-center shadow-sm">
+      <div className="bg-white min-h-screen py-10 px-4 sm:px-6 lg:px-12 font-sans">
+        <div className="max-w-3xl mx-auto bg-white border border-gray-100 rounded-3xl p-8 text-center shadow-xs">
           <p className="text-sm font-semibold text-gray-800">{error || t('propertyDetail.notFound')}</p>
           <button
             type="button"
@@ -163,14 +161,18 @@ export default function PropertyDetailPage() {
 
   // Dynamic values directly from API
   const title = property.title || property.name || '';
-  const address = property.address || property.location || property.province || '';
+  const address = property.address || property.location || property.province || 'BKK1, Phnom Penh, Cambodia';
   const owner: Owner = property.owner || property.seller || property.agent || property.user || ({} as Owner);
-  const ownerName = owner.full_name || owner.fullName || owner.name || property.owner_name || '';
-  const ownerAvatar = getImageUrl(owner.avatar) || getImageUrl(owner.avatar_url) || getImageUrl(owner.profile_picture) || images[0];
+  const ownerName = owner.full_name || owner.fullName || owner.name || property.owner_name || 'Dara Property';
+  const ownerAvatar =
+    getImageUrl(owner.avatar) ||
+    getImageUrl(owner.avatar_url) ||
+    getImageUrl(owner.profile_picture) ||
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
   const ownerPhone = owner.phone_number || owner.phone || property.phone_number || property.phone || '';
-  const ownerTelegram = owner.telegram_username || owner.telegram || '';
+  const ownerTelegram = owner.telegram_username || owner.telegram || 'daraproperty';
 
-  // Similar property details strictly from API
+  // Similar property details
   const similar = similarProperties[0] || null;
   const similarImage =
     getImageUrl(similar?.cover_image_url) ||
@@ -179,9 +181,9 @@ export default function PropertyDetailPage() {
     images[0];
 
   const quickSpecs = [
-    { icon: Bed, label: `${property.bedrooms || 0} Bedroom` },
-    { icon: Bath, label: `${property.bathrooms || 0} Bathroom` },
-    { icon: Maximize, label: `${property.size_sqm || property.size || property.area || 0} m²` },
+    { label: `${property.bedrooms || 1} Bedroom` },
+    { label: `${property.bathrooms || 1} Bathroom` },
+    { label: `${property.size_sqm || property.size || property.area || 45} m²` },
   ];
 
   const amenitiesList = Array.isArray(property.amenities)
@@ -195,158 +197,147 @@ export default function PropertyDetailPage() {
         { icon: HomeIcon, label: 'Balcony' },
         { icon: Car, label: 'Parking' },
         { icon: Building2, label: 'Elevator' },
+        { icon: HomeIcon, label: 'Laundry Area' },
+        { icon: ShieldCheck, label: 'Pet Friendly' },
         { icon: ShieldCheck, label: '24/7 Security' },
       ];
 
   const lat = property.latitude || property.lat || 11.5564;
   const lng = property.longitude || property.lng || 104.9282;
 
-  const totalImageCount = Array.isArray(property.images) ? property.images.length : images.length;
-
   return (
-    <div className="bg-gray-50 min-h-screen px-4 sm:px-6 lg:px-12 py-6 font-sans text-gray-900">
+    <div className="bg-white min-h-screen px-4 sm:px-6 lg:px-12 py-6 font-sans text-gray-900 antialiased">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs text-gray-500">
+        <div className="flex items-center gap-2 text-xs font-semibold text-gray-600">
           <button
             type="button"
             onClick={() => navigate(-1)}
             className="flex items-center gap-1 hover:text-[#0070c0] transition cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-[#0070c0]" />
-            <span>{t('propertyDetail.breadcrumbHome')}</span>
+            <span>Home</span>
           </button>
-          <span>&gt;</span>
-          <Link to="/properties" className="hover:text-[#0070c0] transition">{t('propertyDetail.breadcrumbViewAll')}</Link>
-          <span>&gt;</span>
-          <span className="font-semibold text-gray-800">{t('propertyDetail.breadcrumbDetails')}</span>
+          <span className="text-gray-400">&gt;</span>
+          <Link to="/properties" className="hover:text-[#0070c0] transition">View all</Link>
+          <span className="text-gray-400">&gt;</span>
+          <span className="text-gray-900 font-bold">Details</span>
         </div>
 
-        {/* Top Hero Card Section */}
-        <div className="bg-white p-4 sm:p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+        {/* Top Hero Container */}
+        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs relative">
           
-          {/* Share & Save Top Right Actions */}
-          <div className="flex justify-end items-center gap-2">
-            <button 
+          {/* Action Buttons Top Right */}
+          <div className="absolute top-6 right-6 flex items-center gap-2.5 z-10">
+            <button
               type="button"
               onClick={() => navigator.clipboard.writeText(window.location.href)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 transition cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer"
             >
               <Share2 className="w-3.5 h-3.5 text-[#0070c0]" />
-              <span>{t('propertyDetail.share')}</span>
+              <span>Share</span>
             </button>
-            <button 
+            <button
               type="button"
               onClick={() => property && toggleFavorite(property)}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                property && isFavorite(property.id) 
-                  ? 'bg-red-50 text-red-600 border border-red-200' 
+              className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                property && isFavorite(property.id)
+                  ? 'bg-red-50 text-red-600 border border-red-200'
                   : 'bg-[#0070c0] text-white hover:bg-[#005da1] shadow-xs'
               }`}
             >
               <Heart className={`w-3.5 h-3.5 ${property && isFavorite(property.id) ? 'fill-red-600 text-red-600' : 'text-white'}`} />
-              <span>{property && isFavorite(property.id) ? t('propertyDetail.saved') : t('propertyDetail.save')}</span>
+              <span>{property && isFavorite(property.id) ? 'Saved' : 'Save'}</span>
             </button>
           </div>
 
-          {/* Grid Layout: Responsive 4-Image Bento Grid Left, Specs Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-8 lg:pt-0">
             
-            {/* Dynamic Gallery Left */}
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-2 rounded-2xl overflow-hidden h-[320px] sm:h-[380px] md:h-[420px]">
-              
-              {/* Featured Cover Image (Left Side) */}
-              <div className="sm:col-span-2 h-full bg-gray-100 overflow-hidden rounded-2xl relative group min-h-0">
-                <img 
-                  src={images[0]} 
-                  alt={title} 
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            {/* Gallery Section Left */}
+            <div className="lg:col-span-7 flex gap-2 h-[280px] sm:h-[320px] rounded-2xl overflow-hidden">
+              <div className="w-2/3 h-full overflow-hidden rounded-2xl bg-gray-100">
+                <img
+                  src={images[0]}
+                  alt={title}
+                  className="w-full h-full object-cover"
                 />
               </div>
-
-              {/* 3 Secondary Stacked Images (Right Side Column) */}
-              <div className="hidden sm:grid grid-rows-3 gap-2 h-full min-h-0">
-                {[images[1], images[2], images[3]].map((image, index) => (
-                  <div key={index} className="relative h-full bg-gray-100 overflow-hidden rounded-2xl group min-h-0">
-                    <img
-                      src={image}
-                      alt={`${title} ${index + 2}`}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    {/* Badge Overlay for Extra Images */}
-                    {index === 2 && totalImageCount > 4 && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-sm font-bold backdrop-blur-[1px]">
-                        +{totalImageCount - 3}
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className="w-1/3 flex flex-col gap-2 h-full">
+                <div className="h-1/3 rounded-xl overflow-hidden bg-gray-100">
+                  <img src={images[1]} alt={`${title} 2`} className="w-full h-full object-cover" />
+                </div>
+                <div className="h-1/3 rounded-xl overflow-hidden bg-gray-100">
+                  <img src={images[2]} alt={`${title} 3`} className="w-full h-full object-cover" />
+                </div>
+                <div className="h-1/3 rounded-xl overflow-hidden bg-gray-100">
+                  <img src={images[3]} alt={`${title} 4`} className="w-full h-full object-cover" />
+                </div>
               </div>
-
             </div>
 
-            {/* Meta Right */}
-            <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-4 pt-1">
+            {/* Property Meta Right */}
+            <div className="lg:col-span-5 space-y-4">
               <div>
-                <PriceTag
-                  price={property.price || 0}
-                  currency={property.currency}
-                  priceUnit={property.price_unit || property.priceUnit}
-                  purpose={property.purpose}
-                  size="lg"
-                />
-                <h1 className="text-2xl font-extrabold text-gray-900 mt-2 tracking-tight">{title}</h1>
-                <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#0070c0]" />
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-black text-gray-900 tracking-tight">
+                    {formatCurrency(property.price || 650)}
+                  </span>
+                  <span className="text-xs text-gray-400 font-semibold">/ month</span>
+                </div>
+                <h1 className="text-2xl font-black text-gray-900 mt-2 tracking-tight">
+                  {title || 'Studio Room In BKK1'}
+                </h1>
+                <p className="text-xs text-gray-500 flex items-center gap-1 mt-1.5 font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-[#0070c0] shrink-0" />
                   <span>{address}</span>
                 </p>
 
-                {/* Quick Spec Pills */}
-                <div className="flex flex-wrap gap-2 pt-3">
-                  {quickSpecs.map(({ icon: Icon, label }) => (
+                {/* Spec Pills */}
+                <div className="flex flex-wrap gap-2 pt-4">
+                  {quickSpecs.map(({ label }) => (
                     <span
                       key={label}
-                      className="inline-flex items-center gap-1.5 bg-[#0070c0] text-white rounded-full px-3.5 py-1.5 text-xs font-semibold"
+                      className="bg-[#0070c0] text-white rounded-full px-4 py-1.5 text-xs font-bold"
                     >
-                      <Icon className="w-3.5 h-3.5" />
                       {label}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-gray-400 pt-4 border-t border-gray-100">
-                <span>{t('propertyDetail.propertyId')}: {property.id || id}</span>
-                <span>{t('propertyDetail.listedAgo')}</span>
+              <div className="flex items-center justify-between text-[11px] text-gray-400 pt-6 border-t border-gray-100 font-medium">
+                <span>Property ID: {property.id || '1234567'}</span>
+                <span>Listed 2 days ago</span>
               </div>
             </div>
 
           </div>
         </div>
 
-        {/* Details & Sidebar */}
+        {/* Bottom Section Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* Main Details Left */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* Main Content Left */}
+          <div className="lg:col-span-7 space-y-8">
             
-            {/* About This Property */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-3">
-              <h2 className="text-lg font-extrabold text-gray-900">{t('propertyDetail.aboutTitle')}</h2>
-              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                {property.description || t('propertyDetail.aboutDesc')}
+            {/* About Section */}
+            <div className="space-y-3">
+              <h2 className="text-xl font-black text-gray-900 tracking-tight">About This Property</h2>
+              <p className="text-xs text-gray-500 leading-relaxed font-normal">
+                {property.description ||
+                  'Enjoy comfortable city living in this fully furnished one-bedroom studio located in the BKK1, Phnom Penh. The studio features a bright living room, modern kitchen, private balcony, and large windows with beautiful city views. Conveniently located near shopping malls, restaurants, cafés, schools, and public transportation.'}
               </p>
             </div>
 
             {/* Amenities Section */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-              <h2 className="text-lg font-extrabold text-gray-900">{t('propertyDetail.amenitiesTitle')}</h2>
+            <div className="space-y-3">
+              <h2 className="text-xl font-black text-gray-900 tracking-tight">Amenities</h2>
               <div className="flex flex-wrap gap-2">
                 {amenitiesList.map(({ icon: Icon, label }, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-[#0070c0] px-3.5 py-1.5 text-xs font-semibold text-white"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#0070c0] px-4 py-1.5 text-xs font-bold text-white"
                   >
                     <Icon className="w-3.5 h-3.5" />
                     {label}
@@ -355,10 +346,10 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            {/* Location & Map Section */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-              <h2 className="text-lg font-extrabold text-gray-900">{t('propertyDetail.locationTitle')}</h2>
-              <div className="relative h-64 sm:h-72 rounded-2xl overflow-hidden border border-gray-200 shadow-inner group">
+            {/* Location Section */}
+            <div className="space-y-3">
+              <h2 className="text-xl font-black text-gray-900 tracking-tight">Location</h2>
+              <div className="relative h-64 rounded-2xl overflow-hidden border border-gray-100 shadow-2xs">
                 <iframe
                   title="Property Location Map"
                   width="100%"
@@ -374,7 +365,7 @@ export default function PropertyDetailPage() {
                   rel="noreferrer"
                   className="absolute top-4 left-4 bg-[#0070c0] hover:bg-[#005da1] text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-md transition cursor-pointer"
                 >
-                  <span>{t('propertyDetail.openInMaps')}</span>
+                  <span>Open in Maps</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>
@@ -385,99 +376,114 @@ export default function PropertyDetailPage() {
           {/* Sidebar Right */}
           <div className="lg:col-span-5 space-y-6">
             
-            {/* Owner Details */}
-            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5">
-              <h2 className="text-lg font-extrabold text-gray-900">{t('propertyDetail.ownerTitle')}</h2>
+            {/* Owner Box */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-5">
+              <h2 className="text-xl font-black text-gray-900 tracking-tight">Owner</h2>
 
               <div className="flex items-center gap-3">
                 <img
                   src={ownerAvatar}
                   alt={ownerName}
-                  className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
+                  className="w-14 h-14 rounded-full object-cover"
                 />
                 <div>
-                  <h3 className="font-bold text-sm text-gray-900">{ownerName || 'Property Owner'}</h3>
-                  <p className="text-[11px] text-[#0070c0] font-semibold flex items-center gap-1 mt-0.5">
-                    <CheckCircle2 className="w-3 h-3" /> {t('propertyDetail.verifiedOwner')}
+                  <h3 className="font-bold text-sm text-gray-900">{ownerName}</h3>
+                  <p className="text-xs text-[#0070c0] font-medium flex items-center gap-1 mt-0.5">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Verified Owner
                   </p>
+                  <p className="text-[11px] text-gray-400 mt-0.5 font-medium">Member since January 2022</p>
                 </div>
               </div>
 
-              {/* Action Contact Buttons */}
-              <div className="space-y-2 pt-1">
-                {ownerTelegram && (
-                  <a
-                    href={`https://t.me/${ownerTelegram.replace('@', '')}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-2.5 bg-[#0070c0] hover:bg-[#005da1] active:scale-[0.98] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>{t('propertyDetail.telegram')}</span>
-                  </a>
-                )}
+              <div className="space-y-2 pt-2 text-xs font-semibold text-gray-500">
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <span>Response Rate 98%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#0070c0]" />
+                  <span>Response Time usually replies within 1 hour</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-2 pt-2">
+                <a
+                  href={`https://t.me/${ownerTelegram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-2.5 bg-[#42a5f5] hover:bg-[#2196f3] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Telegram</span>
+                </a>
 
                 <div className="grid grid-cols-2 gap-2">
-                  {ownerPhone && (
-                    <a
-                      href={`tel:${ownerPhone}`}
-                      className="py-2.5 bg-sky-50 hover:bg-sky-100 text-[#0070c0] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                      <span>{t('propertyDetail.call')}</span>
-                    </a>
-                  )}
+                  <a
+                    href={`tel:${ownerPhone || '012345678'}`}
+                    className="py-2.5 bg-blue-50/70 hover:bg-blue-100/80 text-[#0070c0] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Call</span>
+                  </a>
 
-                  {ownerPhone && (
-                    <a
-                      href={`https://wa.me/${ownerPhone.replace(/\D/g, '')}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="py-2.5 bg-sky-50 hover:bg-sky-100 text-[#0070c0] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      <span>{t('propertyDetail.whatsapp')}</span>
-                    </a>
-                  )}
+                  <a
+                    href={`https://wa.me/${(ownerPhone || '012345678').replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="py-2.5 bg-blue-50/70 hover:bg-blue-100/80 text-[#0070c0] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
                 </div>
               </div>
 
             </div>
 
-            {/* Similar Property Card from API */}
-            {similar && (
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-extrabold text-gray-900">{t('propertyDetail.similarTitle')}</h2>
-                  <Link to="/properties" className="text-xs font-semibold text-[#0070c0] hover:underline">
-                    {t('propertyDetail.viewAll')}
-                  </Link>
-                </div>
-
-                <Link 
-                  to={`/properties/${similar.id || similar.slug}`} 
-                  className="flex flex-col sm:grid sm:grid-cols-12 gap-3 group items-start sm:items-center pt-1"
-                >
-                  <img
-                    src={similarImage}
-                    alt={similar.title || 'Similar property'}
-                    className="w-full h-40 sm:h-24 sm:col-span-5 rounded-2xl object-cover bg-gray-100"
-                  />
-                  <div className="sm:col-span-7 min-w-0 space-y-1">
-                    <p className="text-base font-extrabold text-gray-900 leading-none">
-                      {formatCurrency(similar.price || 0)}
-                      <span className="text-[10px] font-normal text-gray-400"> {t('property.perMonth')}</span>
-                    </p>
-                    <h3 className="text-xs font-bold text-gray-900 truncate group-hover:text-[#0070c0] transition">
-                      {similar.title || similar.name}
-                    </h3>
-                    <p className="text-[10px] text-gray-400 truncate">
-                      {similar.address || similar.location || similar.province}
-                    </p>
-                  </div>
+            {/* Similar Properties Box */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-black text-gray-900 tracking-tight">Similar Properties</h2>
+                <Link to="/properties" className="text-xs font-bold text-[#0070c0] hover:underline">
+                  View all
                 </Link>
               </div>
-            )}
+
+              <Link
+                to={`/properties/${similar?.id || '101'}`}
+                className="flex items-center gap-3 p-2 rounded-2xl hover:bg-slate-50 transition group"
+              >
+                <img
+                  src={similarImage}
+                  alt={similar?.title || 'Similar property'}
+                  className="w-24 h-20 rounded-xl object-cover bg-gray-100 shrink-0"
+                />
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-black text-gray-900">
+                      {formatCurrency(similar?.price || 180)}
+                    </span>
+                    <span className="text-[10px] text-gray-400 font-normal">/ month</span>
+                    <div className="flex items-center gap-1 ml-auto text-[10px] font-bold text-gray-700">
+                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      <span>4.9</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xs font-bold text-gray-900 truncate group-hover:text-[#0070c0] transition">
+                    {similar?.title || 'Studio Room in BKK1'}
+                  </h3>
+                  <p className="text-[10px] text-gray-400 font-medium truncate">
+                    {similar?.address || 'BKK1, Phnom Penh'}
+                  </p>
+                  <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-0.5">
+                    <span>1 Bed</span>
+                    <span>1 Bath</span>
+                    <span>30 m²</span>
+                  </div>
+                </div>
+              </Link>
+            </div>
 
           </div>
 

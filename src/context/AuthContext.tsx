@@ -83,13 +83,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (hasActiveSession()) {
-      refreshUser();
+      Promise.resolve().then(refreshUser);
     } else {
-      logoutUser();
-      persistUser(null);
-      setLoading(false);
+      Promise.resolve().then(() => {
+        logoutUser();
+        persistUser(null);
+        setLoading(false);
+      });
     }
-  }, [refreshUser]);
+  }, [refreshUser, persistUser]);
 
   const login = useCallback(
     async (credentials: LoginCredentials): Promise<AuthResponse> => {

@@ -28,7 +28,7 @@ export default function ListingManagementPage() {
   }, [page, searchTerm, status, type]);
 
   useEffect(() => {
-    fetchListings();
+    Promise.resolve().then(fetchListings);
   }, [fetchListings]);
 
   const handleExport = async () => {

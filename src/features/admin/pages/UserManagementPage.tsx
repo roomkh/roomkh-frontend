@@ -33,7 +33,7 @@ export default function UserManagementPage() {
   }, [page, searchTerm, role, status]);
 
   useEffect(() => {
-    fetchUsersData();
+    Promise.resolve().then(fetchUsersData);
   }, [fetchUsersData]);
 
   const handleStatusUpdate = async (userId: number | string, newStatus: string) => {

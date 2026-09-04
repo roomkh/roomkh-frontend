@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createProperty } from "../services/sellerService";
 import AddPropertyForm from "../components/AddPropertyForm";
+import type { PropertyFormData } from "../components/AddPropertyForm";
+import type { SellerProperty } from '../../../types';
 import { 
   ChevronRight, 
   ArrowLeft, 
@@ -16,16 +18,16 @@ const AddPropertyPage = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleFormSubmit = async (formData: any) => {
+  const handleFormSubmit = async (formData: PropertyFormData) => {
     try {
       setLoading(true);
       setError(null);
-      await createProperty(formData);
+      await createProperty(formData as unknown as Partial<SellerProperty>);
       navigate("/seller/listings");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to add property:", err);
       setError(
-        err?.response?.data?.message || 
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
         "An unexpected error occurred while creating the listing. Please check your inputs and try again."
       );
     } finally {

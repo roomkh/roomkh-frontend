@@ -1,7 +1,8 @@
+import type { PropertyFormData, FormImage } from "./AddPropertyForm";
 import { useState } from "react";
 import { X, Bed, Bath, Maximize, MapPin, Phone, MessageCircle, Send, CheckCircle2, Share2, Heart } from "lucide-react";
 
-const SellerPropertyPreviewModal = ({ property, images, onClose }: { property: any; images: any[]; onClose: () => void }) => {
+const SellerPropertyPreviewModal = ({ property, images, onClose }: { property: PropertyFormData; images: (FormImage | string)[]; onClose: () => void }) => {
   const [isSaved, setIsSaved] = useState(false);
 
   if (!property) return null;
@@ -13,7 +14,7 @@ const SellerPropertyPreviewModal = ({ property, images, onClose }: { property: a
   const purpose = property.purpose || "RENT";
   const bedrooms = property.bedrooms || 0;
   const bathrooms = property.bathrooms || 0;
-  const sizeSqm = property.size_sqm || property.size || property.area || 0;
+  const sizeSqm = property.size_sqm || 0;
   const description = property.description || "No description provided.";
   const floor = property.floor || "";
   const furnished = property.furnished ? "Yes" : "No";
@@ -37,7 +38,7 @@ const SellerPropertyPreviewModal = ({ property, images, onClose }: { property: a
     PET_FRIENDLY: "Pet Friendly",
   };
 
-  const displayImages = images && images.length > 0 ? images.map((img: any) => (typeof img === "string" ? img : img.url)) : [];
+  const displayImages = images && images.length > 0 ? images.map((img) => (typeof img === "string" ? img : img.url)) : [];
 
   const fallbackImage = "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80";
 

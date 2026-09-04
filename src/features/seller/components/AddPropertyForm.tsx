@@ -20,9 +20,39 @@ import {
   Dog 
 } from "lucide-react";
 import SellerPropertyPreviewModal from "./SellerPropertyPreviewModal";
+import type { PropertyImage } from '../../../types';
 
-const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: any) => void; loading: boolean }) => {
-  const [formData, setFormData] = useState<any>({
+export interface FormImage extends PropertyImage {
+  id: number;
+  file: File;
+}
+
+export interface PropertyFormData {
+  title: string;
+  property_type: string;
+  purpose: string;
+  price: string;
+  price_unit: string;
+  province: string;
+  district: string;
+  commune: string;
+  address: string;
+  description: string;
+  bedrooms: number;
+  bathrooms: number;
+  size_sqm: string;
+  size?: string;
+  area?: string;
+  floor: string;
+  furnished: boolean;
+  age_years: string;
+  amenity_codes: string[];
+  images: FormImage[];
+  status?: string;
+}
+
+const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: PropertyFormData) => void; loading: boolean }) => {
+  const [formData, setFormData] = useState<PropertyFormData>({
     title: "",
     property_type: "",
     purpose: "",
@@ -40,9 +70,10 @@ const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: any) => void;
     furnished: false,
     age_years: "",
     amenity_codes: [] as string[],
+    images: [] as FormImage[],
   });
 
-  const [images, setImages] = useState<any[]>([]);
+  const [images, setImages] = useState<FormImage[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
   // Available amenities grouped by category
@@ -86,14 +117,14 @@ const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: any) => void;
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const target = e.target as HTMLInputElement;
     const { name, value, type, checked } = target;
-    setFormData((prev: any) => ({
+    setFormData((prev: PropertyFormData) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
-    }));
+    }) as PropertyFormData);
   };
 
   const toggleAmenity = (code: string) => {
-    setFormData((prev: any) => {
+    setFormData((prev: PropertyFormData) => {
       const exists = prev.amenity_codes.includes(code);
       return {
         ...prev,
@@ -112,11 +143,11 @@ const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: any) => void;
       file,
       is_cover: images.length === 0 && index === 0,
     }));
-    setImages((prev: any[]) => [...prev, ...newImages].slice(0, 10));
+    setImages((prev: FormImage[]) => [...prev, ...newImages].slice(0, 10));
   };
 
   const removeImage = (id: number) => {
-    setImages((prev: any[]) => {
+    setImages((prev: FormImage[]) => {
       const filtered = prev.filter((img) => img.id !== id);
       if (filtered.length > 0 && !filtered.some((img) => img.is_cover)) {
         filtered[0].is_cover = true;
@@ -126,7 +157,7 @@ const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: any) => void;
   };
 
   const setCoverImage = (id: number) => {
-    setImages((prev: any[]) =>
+    setImages((prev: FormImage[]) =>
       prev.map((img) => ({ ...img, is_cover: img.id === id }))
     );
   };
