@@ -22,6 +22,7 @@ import {
   getAdminOwners,
   getAdminPropertyById,
   exportAdminProperties,
+  deleteAdminProperty,
 } from '../../../service/api';
 
 export const fetchAdminSellerRequests = async (status?: string): Promise<AdminSellerRequest[]> => {
@@ -78,4 +79,8 @@ export const fetchAdminPropertyDetail = async (propertyId: number | string): Pro
 
 export const downloadPropertiesExport = async (params?: { status?: string }): Promise<Blob> => {
   return exportAdminProperties(params);
+};
+
+export const deleteProperty = async (propertyId: number | string): Promise<void> => {
+  return deleteAdminProperty(propertyId);
 };

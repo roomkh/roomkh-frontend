@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   UserPlus,
   Building2,
@@ -9,9 +9,13 @@ import {
   XCircle,
   TrendingUp,
 } from 'lucide-react';
-import { getAdminDashboardStats, getAdminProperties, reviewAdminProperty } from '../../../service/api';
+import { getAdminDashboardStats, getAdminProperties, reviewAdminProperty, getAdminPropertyById } from '../../../service/api';
 import type { AdminDashboardStats, Property } from '../../../types';
 import DashboardPageSkeleton from '../../../components/skeletons/DashboardPageSkeleton';
+import Button from '../../../components/ui/Button';
+import Modal from '../../../components/ui/Modal';
+import ConfirmModal from '../../../components/admin/AdminModal';
+import { useToast } from '../../../context/ToastContext';
 
 const REVENUE_COLORS = ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc'];
 
@@ -37,15 +41,7 @@ function LineChart({ data }: { data: AdminDashboardStats['platform_growth_chart'
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-52 overflow-visible">
       {yTicks.map((tick) => (
-        <line
-          key={tick}
-          x1={pad.left}
-          x2={width - pad.right}
-          y1={pad.top + chartH * tick}
-          y2={pad.top + chartH * tick}
-          stroke="#f1f5f9"
-          strokeWidth="1"
-        />
+        <line key={tick} x1={pad.left} x2={width - pad.right} y1={pad.top + chartH * tick} y2={pad.top + chartH * tick} stroke="#f1f5f9" strokeWidth="1" />
       ))}
       <polygon points={userArea} fill="rgba(148, 163, 184, 0.08)" />
       <polyline points={userPoints} fill="none" stroke="#94a3b8" strokeWidth="2.5" />
@@ -58,13 +54,7 @@ function LineChart({ data }: { data: AdminDashboardStats['platform_growth_chart'
       ))}
       <g className="text-[10px] text-slate-400 font-medium">
         {labels.map((label, i) => (
-          <text
-            key={i}
-            x={pad.left + i * xStep}
-            y={height - 8}
-            textAnchor="middle"
-            fill="#94a3b8"
-          >
+          <text key={i} x={pad.left + i * xStep} y={height - 8} textAnchor="middle" fill="#94a3b8">
             {i % 2 === 0 ? label : ''}
           </text>
         ))}
@@ -88,23 +78,11 @@ function DonutChart({ data, monthlyRevenue }: { data: AdminDashboardStats['reven
       <svg viewBox="0 0 36 36" className="w-44 h-44 transform -rotate-90">
         <circle cx="18" cy="18" r={radius} fill="none" stroke="#f1f5f9" strokeWidth="4.5" strokeDasharray="100 100" />
         {segments.map((seg, i) => (
-          <circle
-            key={i}
-            cx="18"
-            cy="18"
-            r={radius}
-            fill="none"
-            stroke={seg.color}
-            strokeWidth="4.5"
-            strokeDasharray={`${seg.percent * 100} ${100 - seg.percent * 100}`}
-            strokeDashoffset={-seg.offset}
-          />
+          <circle key={i} cx="18" cy="18" r={radius} fill="none" stroke={seg.color} strokeWidth="4.5" strokeDasharray={`${seg.percent * 100} ${100 - seg.percent * 100}`} strokeDashoffset={-seg.offset} />
         ))}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-base font-bold text-slate-900">
-          ${monthlyRevenue?.toLocaleString() ?? '42,850'}
-        </span>
+        <span className="text-base font-bold text-slate-900">${monthlyRevenue?.toLocaleString() ?? '42,850'}</span>
         <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">MRR</span>
       </div>
     </div>
@@ -115,8 +93,17 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
   const [pendingListings, setPendingListings] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewingId, setReviewingId] = useState<number | string | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [reviewModal, setReviewModal] = useState<{ isOpen: boolean; property: Property | null; action: 'Approved' | 'Rejected' | null }>({
+    isOpen: false,
+    property: null,
+    action: null,
+  });
 
-  const fetchDashboardData = async () => {
+  const { toast } = useToast();
+
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const [statsData, propertiesRes] = await Promise.all([
@@ -127,21 +114,41 @@ export default function DashboardPage() {
       setPendingListings(Array.isArray(propertiesRes) ? propertiesRes : []);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+      toast('error', 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     Promise.resolve().then(fetchDashboardData);
-  }, []);
+  }, [fetchDashboardData]);
 
-  const handleReview = async (id: number | string, status: 'Approved' | 'Rejected') => {
+  const openReview = (property: Property, action: 'Approved' | 'Rejected') => {
+    setReviewModal({ isOpen: true, property, action });
+  };
+
+  const handleReview = async () => {
+    if (!reviewModal.property || !reviewModal.action) return;
+    setReviewingId(reviewModal.property.id as number | string);
     try {
-      await reviewAdminProperty(id, { status });
+      await reviewAdminProperty(reviewModal.property.id as number | string, { status: reviewModal.action });
+      toast('success', `Property ${reviewModal.action.toLowerCase()} successfully`);
+      setReviewModal({ isOpen: false, property: null, action: null });
       fetchDashboardData();
-    } catch (error) {
-      console.error(`Failed to review property ${id}:`, error);
+    } catch {
+      toast('error', `Failed to ${reviewModal.action.toLowerCase()} property`);
+    } finally {
+      setReviewingId(null);
+    }
+  };
+
+  const handleViewProperty = async (id: number | string) => {
+    try {
+      const res = await getAdminPropertyById(id);
+      setSelectedProperty(res as Property);
+    } catch {
+      toast('error', 'Failed to load property details');
     }
   };
 
@@ -343,7 +350,11 @@ export default function DashboardPage() {
               ) : (
                 pendingListings.map((property) => (
                   <tr key={property.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-4 px-6 font-semibold text-slate-900">{property.title || 'Untitled'}</td>
+                    <td className="py-4 px-6">
+                      <button onClick={() => handleViewProperty(property.id as number | string)} className="font-semibold text-slate-900 hover:text-indigo-600 transition-colors">
+                        {property.title || 'Untitled'}
+                      </button>
+                    </td>
                     <td className="py-4 px-6 text-slate-600">{property.location || property.address || '-'}</td>
                     <td className="py-4 px-6 font-bold text-slate-900">${property.price?.toLocaleString() ?? 0}</td>
                     <td className="py-4 px-6 text-right">
@@ -351,20 +362,17 @@ export default function DashboardPage() {
                         <span className="bg-amber-50 text-amber-700 border border-amber-200/80 text-[11px] font-semibold px-2.5 py-1 rounded-md">
                           Pending
                         </span>
-                        <button
-                          onClick={() => handleReview(property.id as number | string, 'Approved')}
-                          className="bg-indigo-600 text-white hover:bg-indigo-700 px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors inline-flex items-center gap-1"
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleViewProperty(property.id as number | string)}>
+                          View
+                        </Button>
+                        <Button variant="success" size="sm" onClick={() => openReview(property, 'Approved')} loading={reviewingId === property.id}>
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           Approve
-                        </button>
-                        <button
-                          onClick={() => handleReview(property.id as number | string, 'Rejected')}
-                          className="bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors inline-flex items-center gap-1"
-                        >
-                          <XCircle className="w-3.5 h-3.5 text-slate-400" />
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => openReview(property, 'Rejected')} loading={reviewingId === property.id}>
+                          <XCircle className="w-3.5 h-3.5" />
                           Reject
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -374,6 +382,72 @@ export default function DashboardPage() {
           </table>
         </div>
       </div>
+
+      {/* Review Confirmation Modal */}
+      <ConfirmModal
+        isOpen={reviewModal.isOpen}
+        onClose={() => setReviewModal({ isOpen: false, property: null, action: null })}
+        onConfirm={handleReview}
+        title={reviewModal.action ? `${reviewModal.action} Property` : 'Review Property'}
+        description={
+          reviewModal.property && reviewModal.action
+            ? `Are you sure you want to ${reviewModal.action.toLowerCase()} "${reviewModal.property.title}"? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel={reviewModal.action || 'Confirm'}
+        variant={reviewModal.action === 'Approved' ? 'success' : 'danger'}
+        loading={reviewingId !== null}
+      />
+
+      {/* Property Detail Modal */}
+      <Modal
+        isOpen={!!selectedProperty}
+        onClose={() => setSelectedProperty(null)}
+        title={selectedProperty?.title || 'Property Details'}
+        size="lg"
+        footer={<Button variant="secondary" onClick={() => setSelectedProperty(null)}>Close</Button>}
+      >
+        {selectedProperty && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase">Property Type</p>
+                <p className="text-sm font-medium text-slate-900 mt-0.5">{selectedProperty.property_type || '-'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase">Purpose</p>
+                <p className="text-sm font-medium text-slate-900 mt-0.5">{selectedProperty.purpose || '-'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase">Price</p>
+                <p className="text-sm font-medium text-slate-900 mt-0.5">${selectedProperty.price?.toLocaleString() ?? 0}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase">Status</p>
+                <p className="text-sm font-medium text-slate-900 mt-0.5">{selectedProperty.status || '-'}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase">Location</p>
+                <p className="text-sm font-medium text-slate-900 mt-0.5">{selectedProperty.location || selectedProperty.address || '-'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase">Bedrooms</p>
+                <p className="text-sm font-medium text-slate-900 mt-0.5">{selectedProperty.bedrooms || '-'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase">Bathrooms</p>
+                <p className="text-sm font-medium text-slate-900 mt-0.5">{selectedProperty.bathrooms || '-'}</p>
+              </div>
+            </div>
+            {selectedProperty.description && (
+              <div>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1">Description</p>
+                <p className="text-sm text-slate-600 leading-relaxed">{selectedProperty.description}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

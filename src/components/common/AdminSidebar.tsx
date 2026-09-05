@@ -5,6 +5,8 @@ import {
   Users,
   Building2,
   Home,
+  FileText,
+  BarChart3,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -16,6 +18,8 @@ const NAV_ITEMS = [
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/owners', icon: Building2, label: 'Owners' },
   { to: '/admin/listings', icon: Home, label: 'Listings' },
+  { to: '/admin/seller-requests', icon: FileText, label: 'Seller Requests' },
+  { to: '/admin/property-stats', icon: BarChart3, label: 'Property Stats' },
 ];
 
 export default function AdminSidebar() {

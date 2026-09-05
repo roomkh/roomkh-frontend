@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App';
+import { ToastProvider } from './context/ToastContext';
 import AuthProvider from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { FavoritesProvider } from './hooks/useFavorites';
@@ -18,7 +19,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <LanguageProvider>
             <FavoritesProvider>
-              <App />
+              <ToastProvider>
+                <App />
+              </ToastProvider>
             </FavoritesProvider>
           </LanguageProvider>
         </AuthProvider>

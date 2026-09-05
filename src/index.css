@@ -1,6 +1,4 @@
 @import "tailwindcss";
-/* src/index.css */
-@import "tailwindcss";
 
 @theme {
   --font-sans: 'Inter', sans-serif;
@@ -13,5 +11,5 @@ html[lang="km"] {
 
 body {
   font-family: var(--font-sans);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11"; /* Inter legibility enhancements */
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }

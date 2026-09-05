@@ -204,11 +204,14 @@ export const getMySellerRequest = async (): Promise<AdminSellerRequest | null> =
 export const getAdminSellerRequests = async (status?: string): Promise<AdminSellerRequest[]> => {
   const params: Record<string, unknown> = {};
   if (status) params.status = status;
-  return axiosInstance.get('/admin/seller-requests', { params });
+  const response = await axiosInstance.get('/admin/seller-requests', { params });
+  return (response.data as { data?: AdminSellerRequest[] }).data ?? response.data;
 };
 
-export const reviewSellerRequest = async (requestId: number | string, data: { status: string; admin_note?: string }): Promise<AdminSellerRequest> =>
-  axiosInstance.patch(`/admin/seller-requests/${requestId}`, data);
+export const reviewSellerRequest = async (requestId: number | string, data: { status: string; admin_note?: string }): Promise<AdminSellerRequest> => {
+  const response = await axiosInstance.patch(`/admin/seller-requests/${requestId}`, data);
+  return (response.data as { data?: AdminSellerRequest }).data ?? response.data;
+};
 
 export const getAdminProperties = async (params?: { page?: number; size?: number; status?: string; type?: string; city?: string; search?: string }): Promise<Property[]> => {
   const queryParams: Record<string, unknown> = {
@@ -219,11 +222,14 @@ export const getAdminProperties = async (params?: { page?: number; size?: number
   if (params?.status && params.status !== 'All Status') queryParams.status = params.status;
   if (params?.type && params.type !== 'All Types') queryParams.type = params.type;
   if (params?.city && params.city !== 'All Cities') queryParams.city = params.city;
-  return axiosInstance.get('/admin/properties', { params: queryParams });
+  const response = await axiosInstance.get('/admin/properties', { params: queryParams });
+  return (response.data as { data?: Property[] }).data ?? response.data;
 };
 
-export const reviewAdminProperty = async (propertyId: number | string, data: { status: string; admin_note?: string }): Promise<Property> =>
-  axiosInstance.patch(`/admin/properties/${propertyId}/review`, data);
+export const reviewAdminProperty = async (propertyId: number | string, data: { status: string; admin_note?: string }): Promise<Property> => {
+  const response = await axiosInstance.patch(`/admin/properties/${propertyId}/review`, data);
+  return (response.data as { data?: Property }).data ?? response.data;
+};
 
 export const getAdminUsers = async (params?: { page?: number; size?: number; search?: string; role?: string; status?: string }): Promise<AdminUser[]> => {
   const queryParams: Record<string, unknown> = {
@@ -233,23 +239,34 @@ export const getAdminUsers = async (params?: { page?: number; size?: number; sea
   if (params?.search) queryParams.search = params.search;
   if (params?.role && params.role !== 'All Roles') queryParams.role = params.role;
   if (params?.status && params.status !== 'All Status') queryParams.status = params.status;
-  return axiosInstance.get('/admin/users', { params: queryParams });
+  const response = await axiosInstance.get('/admin/users', { params: queryParams });
+  return (response.data as { data?: AdminUser[] }).data ?? response.data;
 };
 
-export const updateAdminUserStatus = async (userId: number | string, status: string): Promise<AdminUser> =>
-  axiosInstance.patch(`/admin/users/${userId}/status`, { status });
+export const updateAdminUserStatus = async (userId: number | string, status: string): Promise<AdminUser> => {
+  const response = await axiosInstance.patch(`/admin/users/${userId}/status`, { status });
+  return (response.data as { data?: AdminUser }).data ?? response.data;
+};
 
-export const getAdminDashboardStats = async (): Promise<AdminDashboardStats> =>
-  axiosInstance.get('/admin/dashboard/stats');
+export const getAdminDashboardStats = async (): Promise<AdminDashboardStats> => {
+  const response = await axiosInstance.get('/admin/dashboard/stats');
+  return (response.data as { data?: AdminDashboardStats }).data ?? response.data;
+};
 
-export const getAdminUsersStats = async (): Promise<AdminUserStats> =>
-  axiosInstance.get('/admin/users/stats');
+export const getAdminUsersStats = async (): Promise<AdminUserStats> => {
+  const response = await axiosInstance.get('/admin/users/stats');
+  return (response.data as { data?: AdminUserStats }).data ?? response.data;
+};
 
-export const getAdminOwnersStats = async (): Promise<AdminOwnerStats> =>
-  axiosInstance.get('/admin/owners/stats');
+export const getAdminOwnersStats = async (): Promise<AdminOwnerStats> => {
+  const response = await axiosInstance.get('/admin/owners/stats');
+  return (response.data as { data?: AdminOwnerStats }).data ?? response.data;
+};
 
-export const getAdminPropertiesStats = async (): Promise<AdminPropertyStats> =>
-  axiosInstance.get('/admin/properties/stats');
+export const getAdminPropertiesStats = async (): Promise<AdminPropertyStats> => {
+  const response = await axiosInstance.get('/admin/properties/stats');
+  return (response.data as { data?: AdminPropertyStats }).data ?? response.data;
+};
 
 export const getAdminOwners = async (params?: { page?: number; size?: number; search?: string; status?: string; plan?: string }): Promise<Owner[]> => {
   const queryParams: Record<string, unknown> = {
@@ -259,11 +276,17 @@ export const getAdminOwners = async (params?: { page?: number; size?: number; se
   if (params?.search) queryParams.search = params.search;
   if (params?.status && params.status !== 'All Status') queryParams.status = params.status;
   if (params?.plan && params.plan !== 'All Plans') queryParams.plan = params.plan;
-  return axiosInstance.get('/admin/owners', { params: queryParams });
+  const response = await axiosInstance.get('/admin/owners', { params: queryParams });
+  return (response.data as { data?: Owner[] }).data ?? response.data;
 };
 
-export const getAdminPropertyById = async (propertyId: number | string): Promise<Property> =>
-  axiosInstance.get(`/admin/properties/${propertyId}`);
+export const getAdminPropertyById = async (propertyId: number | string): Promise<Property> => {
+  const response = await axiosInstance.get(`/admin/properties/${propertyId}`);
+  return (response.data as { data?: Property }).data ?? response.data;
+};
+
+export const deleteAdminProperty = async (propertyId: number | string): Promise<void> =>
+  axiosInstance.delete(`/admin/properties/${propertyId}`);
 
 export const exportAdminProperties = async (params?: { status?: string }): Promise<Blob> => {
   const queryParams: Record<string, unknown> = {};

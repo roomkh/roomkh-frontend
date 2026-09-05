@@ -25,7 +25,7 @@ export default defineConfig([
         'error',
         {
           allowConstantExport: true,
-          allowExportNames: ['AuthContext', 'useAuth', 'LanguageContext', 'useLanguage', 'useFavorites'],
+          allowExportNames: ['AuthContext', 'useAuth', 'LanguageContext', 'useLanguage', 'useFavorites', 'useToast'],
         },
       ],
     },

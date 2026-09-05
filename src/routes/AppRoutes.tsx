@@ -13,6 +13,7 @@ import OwnerManagementPageSkeleton from '../components/skeletons/OwnerManagement
 import ListingManagementPageSkeleton from '../components/skeletons/ListingManagementPageSkeleton';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import MainLayout from '../layouts/MainLayout';
+import SellerLayout from '../layouts/SellerLayout';
 import AdminGuard from './AdminGuard';
 import AdminRedirectGuard from './AdminRedirectGuard';
 import SellerGuard from './SellerGuard';
@@ -39,6 +40,8 @@ const DashboardPage = lazy(() => import('../features/admin/pages/DashboardPage')
 const UserManagementPage = lazy(() => import('../features/admin/pages/UserManagementPage'));
 const OwnerManagementPage = lazy(() => import('../features/admin/pages/OwnerManagementPage'));
 const ListingManagementPage = lazy(() => import('../features/admin/pages/ListingManagementPage'));
+const SellerRequestsPage = lazy(() => import('../features/admin/pages/SellerRequestsPage'));
+const PropertyStatsPage = lazy(() => import('../features/admin/pages/PropertyStatsPage'));
 
 function withSkeleton(Page: ComponentType, Skeleton: ComponentType) {
   return (
@@ -57,6 +60,8 @@ export default function AppRoutes() {
         <Route path="/admin/users" element={withSkeleton(UserManagementPage, UserManagementPageSkeleton)} />
         <Route path="/admin/owners" element={withSkeleton(OwnerManagementPage, OwnerManagementPageSkeleton)} />
         <Route path="/admin/listings" element={withSkeleton(ListingManagementPage, ListingManagementPageSkeleton)} />
+        <Route path="/admin/seller-requests" element={withSkeleton(SellerRequestsPage, LoadingSpinner)} />
+        <Route path="/admin/property-stats" element={withSkeleton(PropertyStatsPage, DashboardPageSkeleton)} />
       </Route>
 
       {/* Public routes with MainLayout - admin gets redirected to /admin */}
@@ -79,16 +84,19 @@ export default function AppRoutes() {
           <Route path="/login" element={withSkeleton(LoginPage, LoadingSpinner)} />
           <Route path="/register" element={withSkeleton(RegisterPage, LoadingSpinner)} />
 
-          <Route element={<SellerGuard />}>
-            <Route path="/seller" element={withSkeleton(SellerDashboard, LoadingSpinner)} />
-            <Route path="/seller/listings" element={withSkeleton(SellerListingsPage, LoadingSpinner)} />
-            <Route path="/seller/add-property" element={withSkeleton(AddPropertyPage, LoadingSpinner)} />
-          </Route>
-
           <Route element={<UserGuard />}>
             <Route path="/profile" element={withSkeleton(ProfilePage, LoadingSpinner)} />
             <Route path="/settings" element={withSkeleton(SettingsPage, LoadingSpinner)} />
           </Route>
+        </Route>
+      </Route>
+
+      {/* Seller routes - separate layout with sidebar */}
+      <Route element={<SellerGuard />}>
+        <Route element={<SellerLayout />}>
+          <Route path="/seller" element={withSkeleton(SellerDashboard, LoadingSpinner)} />
+          <Route path="/seller/listings" element={withSkeleton(SellerListingsPage, LoadingSpinner)} />
+          <Route path="/seller/add-property" element={withSkeleton(AddPropertyPage, LoadingSpinner)} />
         </Route>
       </Route>
     </Routes>
