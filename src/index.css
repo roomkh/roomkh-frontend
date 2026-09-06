@@ -1,15 +1,81 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Inter', 'Kantumruy Pro', sans-serif;
   --font-km: 'Kantumruy Pro', sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Koulen', sans-serif;
 }
 
-html[lang="km"] {
-  --font-sans: 'Kantumruy Pro', sans-serif;
+@layer base {
+  body {
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
 }
 
-body {
-  font-family: var(--font-sans);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+/* ---------------------------------------------------------------------------
+   Skeleton loading
+   One highlight band travelling left -> right across every placeholder block.
+   The band is a pseudo element moved with `transform`, so it stays on the
+   compositor (no layout/paint per frame) and reads as smooth even when a page
+   shows dozens of blocks at once. `linear` timing keeps the glow at a constant
+   speed, so it reads as a directional sweep rather than a pulse.
+--------------------------------------------------------------------------- */
+@keyframes skeleton-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+/* Variant for skeletons sitting on a dark/coloured surface (e.g. the hero card). */
+.skeleton-light {
+  background-color: rgb(255 255 255 / 0.28);
+}
+
+.skeleton::after,
+.skeleton-light::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  will-change: transform;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(255 255 255 / 0.2) 30%,
+    rgb(255 255 255 / 0.9) 50%,
+    rgb(255 255 255 / 0.2) 70%,
+    transparent 100%
+  );
+  animation: skeleton-sweep 1.5s linear infinite;
+}
+
+.skeleton-light::after {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(255 255 255 / 0.15) 30%,
+    rgb(255 255 255 / 0.6) 50%,
+    rgb(255 255 255 / 0.15) 70%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after,
+  .skeleton-light::after {
+    animation: none;
+  }
 }

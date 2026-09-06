@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { LOGO_URL } from '../../config/constants';
 import { Menu, X, ChevronDown, User, LogOut, Settings, Globe, LogIn, UserPlus, Heart } from 'lucide-react';
-import logo from '../../assets/images/logoImg-removebg-preview.png';
 import cambodiaFlag from '../../assets/images/cambodia_square_icon_64.png';
 import unitedKingdomFlag from '../../assets/images/united_kingdom_square_icon_64.png';
 import { useAuth } from '../../context/AuthContext';
@@ -14,7 +14,9 @@ const LANGUAGES = [
 
 const NAV_ITEMS = [
   { to: '/', labelKey: 'nav.home' },
+  { to: '/search', labelKey: 'nav.search' },
   { to: '/sell', labelKey: 'nav.sell' },
+  { to: '/tourism', labelKey: 'nav.tourism' },
   { to: '/about', labelKey: 'nav.about' },
   { to: '/help', labelKey: 'nav.help' },
 ];
@@ -73,13 +75,13 @@ export default function Navbar() {
           className="flex items-center gap-2 group transition-transform active:scale-95 duration-150"
         >
           <img
-            src={logo}
+            src={LOGO_URL}
             alt="RoomKH Logo"
             className="h-12 sm:h-14 w-auto object-contain group-hover:opacity-90 transition-opacity"
           />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-gray-600">
+        <nav className="hidden md:flex items-center gap-4 lg:gap-7 xl:gap-8 text-sm font-semibold text-gray-600 whitespace-nowrap">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.to);
             return (
@@ -241,14 +243,14 @@ export default function Navbar() {
             <div className="flex items-center gap-2 border-l border-gray-200 pl-3">
               <Link
                 to="/login"
-                className="px-3.5 py-1.5 text-xs font-bold text-gray-700 hover:text-blue-600 hover:bg-gray-100/80 rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                className="px-3.5 py-1.5 text-sm font-bold text-gray-700 hover:text-blue-600 hover:bg-gray-100/80 rounded-xl transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>{t('nav.login')}</span>
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl shadow-sm hover:shadow transition cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-1.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl shadow-sm hover:shadow transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 <span>{t('nav.signup')}</span>
@@ -274,7 +276,7 @@ export default function Navbar() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                className={`py-2 px-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-1.5 ${
                   isActive(item.to)
                     ? 'bg-blue-50 text-blue-600 font-bold'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -287,7 +289,7 @@ export default function Navbar() {
               <Link
                 to="/seller"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+                className={`py-2 px-3 rounded-xl text-sm font-semibold transition-all ${
                   isActive('/seller')
                     ? 'bg-blue-50 text-blue-600 font-bold'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -300,7 +302,7 @@ export default function Navbar() {
               <Link
                 to="/admin"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+                className={`py-2 px-3 rounded-xl text-sm font-semibold transition-all ${
                   isActive('/admin')
                     ? 'bg-blue-50 text-blue-600 font-bold'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -339,7 +341,7 @@ export default function Navbar() {
             <Link
               to="/favorites"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50"
             >
               <Heart className="w-3.5 h-3.5 text-red-500" />
               <span>{t('favorites.title')}</span>
@@ -376,14 +378,14 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-2.5 text-center text-xs font-bold text-gray-700 bg-gray-100 rounded-xl transition hover:bg-gray-200"
+                  className="w-full py-2.5 text-center text-sm font-bold text-gray-700 bg-gray-100 rounded-xl transition hover:bg-gray-200"
                 >
                   {t('nav.login')}
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-2.5 text-center text-xs font-bold text-white bg-blue-600 rounded-xl shadow-sm hover:bg-blue-700 transition"
+                  className="w-full py-2.5 text-center text-sm font-bold text-white bg-blue-600 rounded-xl shadow-sm hover:bg-blue-700 transition"
                 >
                   {t('nav.signup')}
                 </Link>

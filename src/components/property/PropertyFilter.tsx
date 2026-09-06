@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SelectDropdown from '../common/SelectDropdown';
 import {
   Search,
   MapPin,
@@ -6,7 +7,6 @@ import {
   Tag,
   DollarSign,
   RotateCcw,
-  ChevronDown,
   Filter,
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
@@ -44,6 +44,27 @@ export default function PropertyFilter({
   });
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const PROVINCE_OPTIONS = [
+    { value: 'Phnom Penh', label: 'Phnom Penh' },
+    { value: 'Siem Reap', label: 'Siem Reap' },
+    { value: 'Battambang', label: 'Battambang' },
+    { value: 'Sihanoukville', label: 'Sihanoukville' },
+  ];
+
+  const PROPERTYTYPE_OPTIONS = [
+    { value: 'ROOM', label: t('property.studioRoom') },
+    { value: 'APARTMENT', label: t('property.apartment') },
+    { value: 'CONDO', label: t('property.condo') },
+    { value: 'HOUSE', label: t('property.house') },
+    { value: 'VILLA', label: t('property.villa') },
+    { value: 'LAND', label: t('property.land') },
+  ];
+
+  const PURPOSE_OPTIONS = [
+    { value: 'RENT', label: t('hero.forRent') },
+    { value: 'SALE', label: t('hero.forSale') },
+  ];
 
   const handleChange = (field: keyof FilterState, value: string) => {
     const updated: FilterState = { ...localFilters, [field]: value };
@@ -112,18 +133,15 @@ export default function PropertyFilter({
             </label>
             <div className="flex items-center gap-1.5 relative mt-0.5">
               <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-              <select
-                className="w-full text-xs font-semibold text-gray-800 bg-transparent outline-none appearance-none pr-4 cursor-pointer"
-                value={localFilters.province}
-                onChange={(e) => handleChange('province', e.target.value)}
-              >
-                <option value="">{t('filter.allLocations')}</option>
-                <option value="Phnom Penh">Phnom Penh</option>
-                <option value="Siem Reap">Siem Reap</option>
-                <option value="Battambang">Battambang</option>
-                <option value="Sihanoukville">Sihanoukville</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-0 pointer-events-none" />
+              <SelectDropdown
+                className="flex-1 min-w-0"
+                value={localFilters.province ?? ''}
+                onChange={(next) => handleChange('province', next)}
+                options={PROVINCE_OPTIONS}
+                placeholder={t('filter.allLocations')}
+                triggerClassName="w-full text-xs font-semibold text-gray-800 bg-transparent border-2 border-transparent rounded"
+                chevronClassName="text-gray-400"
+              />
             </div>
           </div>
 
@@ -134,20 +152,15 @@ export default function PropertyFilter({
             </label>
             <div className="flex items-center gap-1.5 relative mt-0.5">
               <Home className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-              <select
-                className="w-full text-xs font-semibold text-gray-800 bg-transparent outline-none appearance-none pr-4 cursor-pointer"
-                value={localFilters.propertyType}
-                onChange={(e) => handleChange('propertyType', e.target.value)}
-              >
-                <option value="">{t('filter.allTypes')}</option>
-                <option value="ROOM">{t('property.studioRoom')}</option>
-                <option value="APARTMENT">{t('property.apartment')}</option>
-                <option value="CONDO">{t('property.condo')}</option>
-                <option value="HOUSE">{t('property.house')}</option>
-                <option value="VILLA">{t('property.villa')}</option>
-                <option value="LAND">{t('property.land')}</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-0 pointer-events-none" />
+              <SelectDropdown
+                className="flex-1 min-w-0"
+                value={localFilters.propertyType ?? ''}
+                onChange={(next) => handleChange('propertyType', next)}
+                options={PROPERTYTYPE_OPTIONS}
+                placeholder={t('filter.allTypes')}
+                triggerClassName="w-full text-xs font-semibold text-gray-800 bg-transparent border-2 border-transparent rounded"
+                chevronClassName="text-gray-400"
+              />
             </div>
           </div>
 
@@ -158,16 +171,15 @@ export default function PropertyFilter({
             </label>
             <div className="flex items-center gap-1.5 relative mt-0.5">
               <Tag className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-              <select
-                className="w-full text-xs font-semibold text-gray-800 bg-transparent outline-none appearance-none pr-4 cursor-pointer"
-                value={localFilters.purpose}
-                onChange={(e) => handleChange('purpose', e.target.value)}
-              >
-                <option value="">{t('filter.anyPurpose')}</option>
-                <option value="RENT">{t('hero.forRent')}</option>
-                <option value="SALE">{t('hero.forSale')}</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-0 pointer-events-none" />
+              <SelectDropdown
+                className="flex-1 min-w-0"
+                value={localFilters.purpose ?? ''}
+                onChange={(next) => handleChange('purpose', next)}
+                options={PURPOSE_OPTIONS}
+                placeholder={t('filter.anyPurpose')}
+                triggerClassName="w-full text-xs font-semibold text-gray-800 bg-transparent border-2 border-transparent rounded"
+                chevronClassName="text-gray-400"
+              />
             </div>
           </div>
 

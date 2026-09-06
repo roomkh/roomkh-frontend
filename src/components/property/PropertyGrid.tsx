@@ -48,12 +48,16 @@ export default function PropertyGrid({ filters = {} }: { filters?: PropertyFilte
 
   if (loading) {
     return (
-      <div className="py-4">
+      // No extra padding here: the grid has to sit exactly where the loaded
+      // grid below will sit, otherwise the cards jump when data lands.
+      <div className="relative">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          <PropertyCardSkeleton count={8} />
+          {/* Same count as the page size the API is being asked for, so the
+              placeholder grid is exactly as tall as the grid that replaces it. */}
+          <PropertyCardSkeleton count={filters.size ?? 12} />
         </div>
         {slowNotice && (
-          <p className="mt-4 mx-auto w-fit text-xs text-amber-600 bg-amber-50 px-3 py-1 rounded-full animate-pulse border border-amber-200">
+          <p className="absolute left-1/2 -translate-x-1/2 -bottom-7 w-max text-xs text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
             {t('property.loadingSlow')}
           </p>
         )}

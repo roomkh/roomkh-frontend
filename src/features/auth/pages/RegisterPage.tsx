@@ -15,9 +15,9 @@ import {
   KeyRound, 
   ArrowRight 
 } from 'lucide-react';
-import logo from '../../../assets/images/logoImg-removebg-preview.png';
 import { useAuth } from '../../../context/AuthContext';
 import { useLanguage } from '../../../context/LanguageContext';
+import { LOGO_URL } from '../../../config/constants';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -111,7 +111,7 @@ export default function RegisterPage() {
 
         <div className="relative z-10 space-y-3">
           <Link to="/" className="flex items-center gap-2 group">
-            <img src={logo} alt="RoomKH Logo" className="h-10 w-auto object-contain" />
+            <img src={LOGO_URL} alt="RoomKH Logo" className="h-10 w-auto object-contain" />
             <div>
               <span className="font-extrabold text-lg text-blue-900 tracking-tight block leading-none">
                 RoomKH
@@ -185,7 +185,7 @@ export default function RegisterPage() {
           
           <div className="text-center space-y-2">
             <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-md">
-              <img src={logo} alt="RoomKH Icon" className="w-7 h-7 object-contain filter brightness-0 invert" />
+              <img src={LOGO_URL} alt="RoomKH Icon" className="w-7 h-7 object-contain filter brightness-0 invert" />
             </div>
             <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight pt-1">
               {t('register.title')}

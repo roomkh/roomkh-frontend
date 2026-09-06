@@ -64,6 +64,7 @@ export interface Property {
   view_count?: number;
   inquiry_count?: number;
   listed_at?: string;
+  published_at?: string;
 }
 
 export interface Owner {

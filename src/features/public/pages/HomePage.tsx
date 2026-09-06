@@ -16,12 +16,6 @@ export default function HomePage() {
     setSearchFilters(filters);
   };
 
-  const handleSelectLocation = (locationName: string) => {
-    setSearchFilters((prev) => ({
-      ...prev,
-      location: locationName,
-    }));
-  };
   const navigate = useNavigate();
   return (
     <>
@@ -44,7 +38,7 @@ export default function HomePage() {
       </section>
 
       {/* Locations Section */}
-      <LocationBrowse onSelectLocation={handleSelectLocation} />
+      <LocationBrowse />
 
       {/* Trust & Value Proposition Banner */}
       <WhyChooseUs />

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import SelectDropdown from '../../../components/common/SelectDropdown';
 import { Search, Shield, Mail, Phone, UserCircle, Trash2 } from 'lucide-react';
 import { getAdminUsers, getAdminUsersStats, updateAdminUserStatus } from '../../../service/api';
 import type { AdminUser, AdminUserStats } from '../../../types';
@@ -8,6 +9,20 @@ import Modal from '../../../components/ui/Modal';
 import ConfirmModal from '../../../components/admin/AdminModal';
 import Pagination from '../../../components/common/Pagination';
 import { useToast } from '../../../context/ToastContext';
+
+const ROLE_OPTIONS = [
+  { value: 'All Roles', label: 'All Roles' },
+  { value: 'USER', label: 'USER' },
+  { value: 'SELLER', label: 'SELLER' },
+  { value: 'ADMIN', label: 'ADMIN' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'All Status', label: 'All Status' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Inactive', label: 'Inactive' },
+];
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -140,27 +155,23 @@ export default function UserManagementPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <select
+            <SelectDropdown
               value={role}
-              onChange={(e) => { setRole(e.target.value); setPage(1); }}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option>All Roles</option>
-              <option>USER</option>
-              <option>SELLER</option>
-              <option>ADMIN</option>
-            </select>
+              onChange={(next) => { setRole(next); setPage(1); }}
+              options={ROLE_OPTIONS}
+              align="right"
+              panelClassName="w-44"
+              triggerClassName="px-3 py-1.5 text-xs border-2 border-slate-200 rounded-lg bg-white text-slate-700"
+            />
 
-            <select
+            <SelectDropdown
               value={status}
-              onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option>All Status</option>
-              <option>Active</option>
-              <option>Pending</option>
-              <option>Inactive</option>
-            </select>
+              onChange={(next) => { setStatus(next); setPage(1); }}
+              options={STATUS_OPTIONS}
+              align="right"
+              panelClassName="w-44"
+              triggerClassName="px-3 py-1.5 text-xs border-2 border-slate-200 rounded-lg bg-white text-slate-700"
+            />
           </div>
         </div>
 

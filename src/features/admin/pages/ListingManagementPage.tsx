@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import SelectDropdown from '../../../components/common/SelectDropdown';
 import { Search, Download, Eye, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 import { getAdminProperties, exportAdminProperties, reviewAdminProperty, getAdminPropertyById, deleteAdminProperty } from '../../../service/api';
 import type { Property } from '../../../types';
@@ -8,6 +9,23 @@ import Modal from '../../../components/ui/Modal';
 import ConfirmModal from '../../../components/admin/AdminModal';
 import Pagination from '../../../components/common/Pagination';
 import { useToast } from '../../../context/ToastContext';
+
+const STATUS_OPTIONS = [
+  { value: 'All Status', label: 'All Status' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Inactive', label: 'Inactive' },
+];
+
+const TYPE_OPTIONS = [
+  { value: 'All Types', label: 'All Types' },
+  { value: 'ROOM', label: 'ROOM' },
+  { value: 'HOME', label: 'HOME' },
+  { value: 'APARTMENT', label: 'APARTMENT' },
+  { value: 'VILLA', label: 'VILLA' },
+  { value: 'LAND', label: 'LAND' },
+  { value: 'TOURISM', label: 'TOURISM' },
+];
 
 export default function ListingManagementPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -144,27 +162,23 @@ export default function ListingManagementPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <select
+            <SelectDropdown
               value={status}
-              onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option>All Status</option>
-              <option>Active</option>
-              <option>Pending</option>
-              <option>Inactive</option>
-            </select>
+              onChange={(next) => { setStatus(next); setPage(1); }}
+              options={STATUS_OPTIONS}
+              align="right"
+              panelClassName="w-44"
+              triggerClassName="px-3 py-1.5 text-xs border-2 border-slate-200 rounded-lg bg-white text-slate-700"
+            />
 
-            <select
+            <SelectDropdown
               value={type}
-              onChange={(e) => { setType(e.target.value); setPage(1); }}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option>All Types</option>
-              <option>ROOM</option>
-              <option>CONDO</option>
-              <option>HOUSE</option>
-            </select>
+              onChange={(next) => { setType(next); setPage(1); }}
+              options={TYPE_OPTIONS}
+              align="right"
+              panelClassName="w-44"
+              triggerClassName="px-3 py-1.5 text-xs border-2 border-slate-200 rounded-lg bg-white text-slate-700"
+            />
           </div>
         </div>
 

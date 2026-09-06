@@ -33,9 +33,9 @@ const persistAuth = (response: AuthResponse): void => {
 
 export const loginUser = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   const payload = {
-    email: credentials.email,
+    identifier: credentials.email,
     password: credentials.password,
-    remember_me: credentials.rememberMe,
+    rememberMe: credentials.rememberMe,
   };
 
   const response = (await axiosInstance.post('/auth/login', payload)) as unknown as AuthResponse;
@@ -46,10 +46,9 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthResp
 export const registerUser = async (userData: RegisterData): Promise<AuthResponse> => {
   const payload = {
     full_name: userData.fullName,
-    email: userData.email,
+    identifier: userData.email,
     password: userData.password,
-    phone_number: userData.phone,
-    role: userData.role || 'USER',
+    password_confirmation: userData.password,
   };
 
   const response = (await axiosInstance.post('/auth/register', payload)) as unknown as AuthResponse;

@@ -20,8 +20,13 @@ import {
   Clock,
 } from 'lucide-react';
 import PropertyDetailSkeleton from '../../../components/skeletons/PropertyDetailSkeleton';
+import ImageLightbox from '../../../components/property/ImageLightbox';
 import { formatCurrency } from '../../../utils/formatCurrency';
-import { getPropertyById, getSimilarProperties } from '../../../service/api';
+import { getOwnerProperties, getPropertyById } from '../../../service/api';
+import {
+  getMockTourismProperty,
+  getMockTourismSimilar,
+} from '../../../data/mockTourismProperties';
 import { useFavorites } from '../../../hooks/useFavorites';
 import { useLanguage } from '../../../context/LanguageContext';
 import type { Owner, Property } from '../../../types';
@@ -48,47 +53,65 @@ export default function PropertyDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const [property, setProperty] = useState<Property | null>(null);
-  const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [apiProperty, setApiProperty] = useState<Property | null>(null);
+  const [apiOwnerProperties, setApiOwnerProperties] = useState<Property[]>([]);
+  const [apiLoading, setApiLoading] = useState(true);
+  const [apiError, setApiError] = useState('');
   const { isFavorite, toggleFavorite } = useFavorites();
+  // Index of the image opened in the fullscreen viewer; null means closed.
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Mock tourism areas listed on /tourism are not on the API yet, so their
+  // detail pages are served straight from the local mock data.
+  const mockTourism = useMemo(() => getMockTourismProperty(id), [id]);
+  const property = mockTourism ?? apiProperty;
+  // Listings from the same owner, shown in the sidebar below the owner card.
+  const ownerProperties = useMemo(
+    () => (mockTourism ? getMockTourismSimilar(id) : apiOwnerProperties),
+    [mockTourism, id, apiOwnerProperties]
+  );
+  const loading = mockTourism ? false : apiLoading;
+  const error = mockTourism ? '' : apiError;
 
   useEffect(() => {
      let isMounted = true;
+
+    if (mockTourism) return;
 
     getPropertyById(id ?? '')
       .then((data) => {
         if (!isMounted) return;
         const prop = data as Property | null;
-        setProperty(prop);
+        setApiProperty(prop);
       })
       .catch(() => {
         if (!isMounted) return;
-        setError(t('propertyDetail.loadError'));
+        setApiError(t('propertyDetail.loadError'));
       })
       .finally(() => {
-        if (isMounted) setLoading(false);
+        if (isMounted) setApiLoading(false);
       });
 
-    getSimilarProperties(id ?? '')
+    getOwnerProperties(id ?? '')
       .then((data) => {
         if (!isMounted) return;
         const list = Array.isArray(data) ? (data as Property[]) : [];
-        setSimilarProperties(list.slice(0, 1));
+        setApiOwnerProperties(list);
       })
       .catch(() => {
-        if (isMounted) setSimilarProperties([]);
+        if (isMounted) setApiOwnerProperties([]);
       });
 
     return () => {
       isMounted = false;
     };
-  }, [id, t]);
+  }, [id, t, mockTourism]);
 
-  // Dynamically build a 4-image gallery directly from API property object
-  const images = useMemo(() => {
-    if (!property) return [];
+  // Dynamically build the gallery directly from API property object:
+  // `all` is every distinct photo (used by the fullscreen viewer), `grid` is
+  // the 4 tiles of the hero collage, padded with repeats when photos are few.
+  const gallery = useMemo<{ all: string[]; grid: string[] }>(() => {
+    if (!property) return { all: [], grid: [] };
 
     const rawImages: Array<{ url: string; is_cover?: boolean; sort_order?: number }> = [];
 
@@ -126,16 +149,26 @@ export default function PropertyDetailPage() {
       uniqueImages.unshift(cover);
     }
 
-    while (uniqueImages.length < 4) {
+    const padded = [...uniqueImages];
+    while (padded.length < 4) {
       const fallback =
-        uniqueImages[0] ||
+        padded[0] ||
         cover ||
         'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80';
-      uniqueImages.push(fallback);
+      padded.push(fallback);
     }
+    if (uniqueImages.length === 0) uniqueImages.push(padded[0]);
 
-    return uniqueImages.slice(0, 4);
+    return { all: uniqueImages, grid: padded.slice(0, 4) };
   }, [property]);
+
+  const images = gallery.grid;
+  const lightboxImages = gallery.all;
+
+  const openLightbox = (image: string) => {
+    const index = lightboxImages.indexOf(image);
+    setLightboxIndex(index >= 0 ? index : 0);
+  };
 
   if (loading) {
     return <PropertyDetailSkeleton />;
@@ -172,12 +205,10 @@ export default function PropertyDetailPage() {
   const ownerPhone = owner.phone_number || owner.phone || property.phone_number || property.phone || '';
   const ownerTelegram = owner.telegram_username || owner.telegram || 'daraproperty';
 
-  // Similar property details
-  const similar = similarProperties[0] || null;
-  const similarImage =
-    getImageUrl(similar?.cover_image_url) ||
-    getImageUrl(similar?.coverImageUrl) ||
-    getImageUrl(similar?.images?.[0]) ||
+  const getCardImage = (item: Property): string =>
+    getImageUrl(item.cover_image_url) ||
+    getImageUrl(item.coverImageUrl) ||
+    getImageUrl(item.images?.[0]) ||
     images[0];
 
   const quickSpecs = [
@@ -228,51 +259,122 @@ export default function PropertyDetailPage() {
         {/* Top Hero Container */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs relative">
           
-          {/* Action Buttons Top Right */}
-          <div className="absolute top-6 right-6 flex items-center gap-2.5 z-10">
-            <button
-              type="button"
-              onClick={() => navigator.clipboard.writeText(window.location.href)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer"
-            >
-              <Share2 className="w-3.5 h-3.5 text-[#0070c0]" />
-              <span>Share</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => property && toggleFavorite(property)}
-              className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-                property && isFavorite(property.id)
-                  ? 'bg-red-50 text-red-600 border border-red-200'
-                  : 'bg-[#0070c0] text-white hover:bg-[#005da1] shadow-xs'
-              }`}
-            >
-              <Heart className={`w-3.5 h-3.5 ${property && isFavorite(property.id) ? 'fill-red-600 text-red-600' : 'text-white'}`} />
-              <span>{property && isFavorite(property.id) ? 'Saved' : 'Save'}</span>
-            </button>
+          {/* Owner Header + Contact & Actions */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+
+            <div className="flex items-center gap-3 min-w-0 sm:flex-1">
+              <img
+                src={ownerAvatar}
+                alt={ownerName}
+                className="w-14 h-14 rounded-full object-cover shrink-0"
+              />
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm text-gray-900 truncate">{ownerName}</h3>
+                <p className="text-xs text-[#0070c0] font-medium flex items-center gap-1 mt-0.5">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Verified Owner
+                </p>
+                <p className="text-[11px] text-gray-400 mt-0.5 font-medium flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                  <span className="flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    98% response rate
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#0070c0]" />
+                    Replies within 1 hour
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+              <a
+                href={`https://t.me/${ownerTelegram.replace('@', '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 bg-[#42a5f5] hover:bg-[#2196f3] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+              >
+                <Send className="w-4 h-4" />
+                <span>Telegram</span>
+              </a>
+
+              <a
+                href={`tel:${ownerPhone || '012345678'}`}
+                className="px-5 py-2.5 bg-blue-50/70 hover:bg-blue-100/80 text-[#0070c0] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Call</span>
+              </a>
+
+              <a
+                href={`https://wa.me/${(ownerPhone || '012345678').replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 bg-blue-50/70 hover:bg-blue-100/80 text-[#0070c0] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>WhatsApp</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(window.location.href)}
+                className="flex items-center gap-2 px-5 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer"
+              >
+                <Share2 className="w-3.5 h-3.5 text-[#0070c0]" />
+                <span>Share</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => property && toggleFavorite(property)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  property && isFavorite(property.id)
+                    ? 'bg-red-50 text-red-600 border border-red-200'
+                    : 'bg-[#0070c0] text-white hover:bg-[#005da1] shadow-xs'
+                }`}
+              >
+                <Heart className={`w-3.5 h-3.5 ${property && isFavorite(property.id) ? 'fill-red-600 text-red-600' : 'text-white'}`} />
+                <span>{property && isFavorite(property.id) ? 'Saved' : 'Save'}</span>
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-8 lg:pt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-6">
             
             {/* Gallery Section Left */}
             <div className="lg:col-span-7 flex gap-2 h-[280px] sm:h-[320px] rounded-2xl overflow-hidden">
-              <div className="w-2/3 h-full overflow-hidden rounded-2xl bg-gray-100">
+              <button
+                type="button"
+                onClick={() => openLightbox(images[0])}
+                aria-label="View photo 1 fullscreen"
+                className="w-2/3 h-full overflow-hidden rounded-2xl bg-gray-100 cursor-zoom-in group"
+              >
                 <img
                   src={images[0]}
                   alt={title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.03]"
                 />
-              </div>
+              </button>
               <div className="w-1/3 flex flex-col gap-2 h-full">
-                <div className="h-1/3 rounded-xl overflow-hidden bg-gray-100">
-                  <img src={images[1]} alt={`${title} 2`} className="w-full h-full object-cover" />
-                </div>
-                <div className="h-1/3 rounded-xl overflow-hidden bg-gray-100">
-                  <img src={images[2]} alt={`${title} 3`} className="w-full h-full object-cover" />
-                </div>
-                <div className="h-1/3 rounded-xl overflow-hidden bg-gray-100">
-                  <img src={images[3]} alt={`${title} 4`} className="w-full h-full object-cover" />
-                </div>
+                {[1, 2, 3].map((i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => openLightbox(images[i])}
+                    aria-label={`View photo ${i + 1} fullscreen`}
+                    className="h-1/3 rounded-xl overflow-hidden bg-gray-100 cursor-zoom-in group relative"
+                  >
+                    <img
+                      src={images[i]}
+                      alt={`${title} ${i + 1}`}
+                      className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.05]"
+                    />
+                    {i === 3 && lightboxImages.length > 4 && (
+                      <span className="absolute inset-0 bg-black/50 text-white text-xs font-bold flex items-center justify-center">
+                        +{lightboxImages.length - 4} more
+                      </span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -283,7 +385,9 @@ export default function PropertyDetailPage() {
                   <span className="text-3xl font-black text-gray-900 tracking-tight">
                     {formatCurrency(property.price || 650)}
                   </span>
-                  <span className="text-xs text-gray-400 font-semibold">/ month</span>
+                  <span className="text-xs text-gray-400 font-semibold">
+                    / {(property.price_unit || property.priceUnit || 'MONTH').toLowerCase()}
+                  </span>
                 </div>
                 <h1 className="text-2xl font-black text-gray-900 mt-2 tracking-tight">
                   {title || 'Studio Room In BKK1'}
@@ -313,6 +417,7 @@ export default function PropertyDetailPage() {
             </div>
 
           </div>
+
         </div>
 
         {/* Bottom Section Layout */}
@@ -346,8 +451,74 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            {/* Location Section */}
-            <div className="space-y-3">
+            {/* Owner Listings Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-black text-gray-900 tracking-tight">
+                  More from {ownerName}
+                </h2>
+                <span className="text-xs font-bold text-gray-400">
+                  {ownerProperties.length}
+                </span>
+              </div>
+
+              {ownerProperties.length === 0 ? (
+                <p className="text-sm text-gray-400 font-medium py-2">
+                  This owner has no other listings right now.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {ownerProperties.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`/properties/${item.id}`}
+                      className="flex items-center gap-5 p-3 rounded-2xl bg-white border border-gray-100 shadow-xs hover:border-[#0070c0]/40 hover:shadow-sm transition group"
+                    >
+                      <img
+                        src={getCardImage(item)}
+                        alt={item.title || 'Property'}
+                        className="w-44 h-32 rounded-xl object-cover bg-gray-100 shrink-0"
+                      />
+                      <div className="min-w-0 space-y-1.5 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl font-black text-gray-900">
+                            {formatCurrency(item.price ?? 0)}
+                          </span>
+                          <span className="text-xs text-gray-400 font-normal">
+                            / {(item.price_unit || item.priceUnit || 'MONTH').toLowerCase()}
+                          </span>
+                          {item.rating != null && (
+                            <div className="flex items-center gap-1 ml-auto text-xs font-bold text-gray-700">
+                              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                              <span>{item.rating}</span>
+                            </div>
+                          )}
+                        </div>
+                        <h3 className="text-base font-bold text-gray-900 truncate group-hover:text-[#0070c0] transition">
+                          {item.title}
+                        </h3>
+                        <p className="text-xs text-gray-400 font-medium truncate">
+                          {item.address || [item.district, item.province].filter(Boolean).join(', ')}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500 font-medium pt-1">
+                          <span>{item.bedrooms ?? 0} Bed</span>
+                          <span>{item.bathrooms ?? 0} Bath</span>
+                          <span>{item.size_sqm ?? item.size ?? 0} m²</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Sidebar Right */}
+          <div className="lg:col-span-5 space-y-6">
+            
+            {/* Location Box */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-4">
               <h2 className="text-xl font-black text-gray-900 tracking-tight">Location</h2>
               <div className="relative h-64 rounded-2xl overflow-hidden border border-gray-100 shadow-2xs">
                 <iframe
@@ -373,123 +544,19 @@ export default function PropertyDetailPage() {
 
           </div>
 
-          {/* Sidebar Right */}
-          <div className="lg:col-span-5 space-y-6">
-            
-            {/* Owner Box */}
-            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-5">
-              <h2 className="text-xl font-black text-gray-900 tracking-tight">Owner</h2>
-
-              <div className="flex items-center gap-3">
-                <img
-                  src={ownerAvatar}
-                  alt={ownerName}
-                  className="w-14 h-14 rounded-full object-cover"
-                />
-                <div>
-                  <h3 className="font-bold text-sm text-gray-900">{ownerName}</h3>
-                  <p className="text-xs text-[#0070c0] font-medium flex items-center gap-1 mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Verified Owner
-                  </p>
-                  <p className="text-[11px] text-gray-400 mt-0.5 font-medium">Member since January 2022</p>
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2 text-xs font-semibold text-gray-500">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <span>Response Rate 98%</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#0070c0]" />
-                  <span>Response Time usually replies within 1 hour</span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-2 pt-2">
-                <a
-                  href={`https://t.me/${ownerTelegram.replace('@', '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full py-2.5 bg-[#42a5f5] hover:bg-[#2196f3] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Telegram</span>
-                </a>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <a
-                    href={`tel:${ownerPhone || '012345678'}`}
-                    className="py-2.5 bg-blue-50/70 hover:bg-blue-100/80 text-[#0070c0] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>Call</span>
-                  </a>
-
-                  <a
-                    href={`https://wa.me/${(ownerPhone || '012345678').replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="py-2.5 bg-blue-50/70 hover:bg-blue-100/80 text-[#0070c0] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    <span>WhatsApp</span>
-                  </a>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Similar Properties Box */}
-            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-black text-gray-900 tracking-tight">Similar Properties</h2>
-                <Link to="/properties" className="text-xs font-bold text-[#0070c0] hover:underline">
-                  View all
-                </Link>
-              </div>
-
-              <Link
-                to={`/properties/${similar?.id || '101'}`}
-                className="flex items-center gap-3 p-2 rounded-2xl hover:bg-slate-50 transition group"
-              >
-                <img
-                  src={similarImage}
-                  alt={similar?.title || 'Similar property'}
-                  className="w-24 h-20 rounded-xl object-cover bg-gray-100 shrink-0"
-                />
-                <div className="min-w-0 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-black text-gray-900">
-                      {formatCurrency(similar?.price || 180)}
-                    </span>
-                    <span className="text-[10px] text-gray-400 font-normal">/ month</span>
-                    <div className="flex items-center gap-1 ml-auto text-[10px] font-bold text-gray-700">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      <span>4.9</span>
-                    </div>
-                  </div>
-                  <h3 className="text-xs font-bold text-gray-900 truncate group-hover:text-[#0070c0] transition">
-                    {similar?.title || 'Studio Room in BKK1'}
-                  </h3>
-                  <p className="text-[10px] text-gray-400 font-medium truncate">
-                    {similar?.address || 'BKK1, Phnom Penh'}
-                  </p>
-                  <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-0.5">
-                    <span>1 Bed</span>
-                    <span>1 Bath</span>
-                    <span>30 m²</span>
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-          </div>
-
         </div>
 
       </div>
+
+      {lightboxIndex !== null && (
+        <ImageLightbox
+          images={lightboxImages}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          alt={title || 'Property image'}
+        />
+      )}
     </div>
   );
 }

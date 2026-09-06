@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import logo from '../../assets/images/logoImg-removebg-preview.png';
+import { LOGO_URL } from '../../config/constants';
 import { MapPin, Phone, Mail, Heart } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -31,7 +31,7 @@ export default function Footer() {
           
           {/* Column 1: Brand & Logo */}
           <div className="sm:col-span-2 md:col-span-1 space-y-4 ">
-            <img src={logo} alt="RoomKH Logo" className="w-12 h-12 bg-white rounded-l object-cover shadow-lg mb-2" />
+            <img src={LOGO_URL} alt="RoomKH Logo" className="w-12 h-12 bg-white rounded-l object-cover shadow-lg mb-2" />
 
             <p className="text-blue-100/90 text-[11px] leading-relaxed max-w-xs">
               {t('footer.desc')}

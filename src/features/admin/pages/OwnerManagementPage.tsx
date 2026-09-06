@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import SelectDropdown from '../../../components/common/SelectDropdown';
 import { Search, Mail, Phone, Building2, CheckCircle2 } from 'lucide-react';
 import { getAdminOwners, getAdminOwnersStats, updateAdminUserStatus } from '../../../service/api';
 import type { Owner, AdminOwnerStats } from '../../../types';
@@ -8,6 +9,20 @@ import Modal from '../../../components/ui/Modal';
 import ConfirmModal from '../../../components/admin/AdminModal';
 import Pagination from '../../../components/common/Pagination';
 import { useToast } from '../../../context/ToastContext';
+
+const STATUS_OPTIONS = [
+  { value: 'All Status', label: 'All Status' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Inactive', label: 'Inactive' },
+];
+
+const PLAN_OPTIONS = [
+  { value: 'All Plans', label: 'All Plans' },
+  { value: 'Basic', label: 'Basic' },
+  { value: 'Business', label: 'Business' },
+  { value: 'Enterprise', label: 'Enterprise' },
+];
 
 export default function OwnerManagementPage() {
   const [owners, setOwners] = useState<Owner[]>([]);
@@ -132,27 +147,23 @@ export default function OwnerManagementPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <select
+            <SelectDropdown
               value={status}
-              onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option>All Status</option>
-              <option>Active</option>
-              <option>Pending</option>
-              <option>Inactive</option>
-            </select>
+              onChange={(next) => { setStatus(next); setPage(1); }}
+              options={STATUS_OPTIONS}
+              align="right"
+              panelClassName="w-44"
+              triggerClassName="px-3 py-1.5 text-xs border-2 border-slate-200 rounded-lg bg-white text-slate-700"
+            />
 
-            <select
+            <SelectDropdown
               value={plan}
-              onChange={(e) => { setPlan(e.target.value); setPage(1); }}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option>All Plans</option>
-              <option>Basic</option>
-              <option>Business</option>
-              <option>Enterprise</option>
-            </select>
+              onChange={(next) => { setPlan(next); setPage(1); }}
+              options={PLAN_OPTIONS}
+              align="right"
+              panelClassName="w-44"
+              triggerClassName="px-3 py-1.5 text-xs border-2 border-slate-200 rounded-lg bg-white text-slate-700"
+            />
           </div>
         </div>
 

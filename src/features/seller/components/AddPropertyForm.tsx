@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SelectDropdown from '../../../components/common/SelectDropdown';
 import { 
   Bed, 
   Bath, 
@@ -50,6 +51,34 @@ export interface PropertyFormData {
   images: FormImage[];
   status?: string;
 }
+
+const PROPERTY_TYPE_OPTIONS = [
+  { value: 'ROOM', label: 'Room' },
+  { value: 'APARTMENT', label: 'Apartment' },
+  { value: 'CONDO', label: 'Condo' },
+  { value: 'VILLA', label: 'Villa' },
+  { value: 'HOME', label: 'Home' },
+  { value: 'TOURISM', label: 'Tourism Area' },
+];
+
+const PURPOSE_OPTIONS = [
+  { value: 'RENT', label: 'Rent' },
+  { value: 'SALE', label: 'Sale' },
+];
+
+const PROVINCE_OPTIONS = [
+  { value: 'Phnom Penh', label: 'Phnom Penh' },
+  { value: 'Siem Reap', label: 'Siem Reap' },
+];
+
+const DISTRICT_OPTIONS = [
+  { value: 'Chamkarmon', label: 'Chamkarmon' },
+  { value: 'Tuol Kouk', label: 'Tuol Kouk' },
+];
+
+const COMMUNE_OPTIONS = [
+  { value: 'Boeng Keng Kang 1', label: 'BKK1' },
+];
 
 const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: PropertyFormData) => void; loading: boolean }) => {
   const [formData, setFormData] = useState<PropertyFormData>({
@@ -123,6 +152,10 @@ const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: PropertyFormD
     }) as PropertyFormData);
   };
 
+  const setField = (name: string, value: string) => {
+    setFormData((prev: PropertyFormData) => ({ ...prev, [name]: value }) as PropertyFormData);
+  };
+
   const toggleAmenity = (code: string) => {
     setFormData((prev: PropertyFormData) => {
       const exists = prev.amenity_codes.includes(code);
@@ -193,33 +226,28 @@ const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: PropertyFormD
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">Property Type *</label>
-              <select
-                name="property_type"
+              <SelectDropdown
                 value={formData.property_type}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select type</option>
-                <option value="ROOM">Room</option>
-                <option value="APARTMENT">Apartment</option>
-                <option value="CONDO">Condo</option>
-                <option value="VILLA">Villa</option>
-                <option value="HOME">Home</option>
-              </select>
+                onChange={(next) => setField('property_type', next)}
+                options={PROPERTY_TYPE_OPTIONS}
+                placeholder="Select type"
+                ariaLabel="Select type"
+                triggerClassName="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm bg-white"
+                placeholderClassName="text-slate-400"
+              />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">Purpose *</label>
-              <select
-                name="purpose"
+              <SelectDropdown
                 value={formData.purpose}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select purpose</option>
-                <option value="RENT">Rent</option>
-                <option value="SALE">Sale</option>
-              </select>
+                onChange={(next) => setField('purpose', next)}
+                options={PURPOSE_OPTIONS}
+                placeholder="Select purpose"
+                ariaLabel="Select purpose"
+                triggerClassName="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm bg-white"
+                placeholderClassName="text-slate-400"
+              />
             </div>
           </div>
 
@@ -246,35 +274,33 @@ const AddPropertyForm = ({ onSubmit, loading }: { onSubmit: (data: PropertyFormD
               </button>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <select
-                name="province"
+              <SelectDropdown
                 value={formData.province}
-                onChange={handleChange}
-                className="px-2 py-2 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Province</option>
-                <option value="Phnom Penh">Phnom Penh</option>
-                <option value="Siem Reap">Siem Reap</option>
-              </select>
-              <select
-                name="district"
+                onChange={(next) => setField('province', next)}
+                options={PROVINCE_OPTIONS}
+                placeholder="Province"
+                ariaLabel="Province"
+                triggerClassName="px-2 py-2 border-2 border-gray-300 rounded-lg text-xs bg-white"
+                placeholderClassName="text-slate-400"
+              />
+              <SelectDropdown
                 value={formData.district}
-                onChange={handleChange}
-                className="px-2 py-2 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">District</option>
-                <option value="Chamkarmon">Chamkarmon</option>
-                <option value="Tuol Kouk">Tuol Kouk</option>
-              </select>
-              <select
-                name="commune"
+                onChange={(next) => setField('district', next)}
+                options={DISTRICT_OPTIONS}
+                placeholder="District"
+                ariaLabel="District"
+                triggerClassName="px-2 py-2 border-2 border-gray-300 rounded-lg text-xs bg-white"
+                placeholderClassName="text-slate-400"
+              />
+              <SelectDropdown
                 value={formData.commune}
-                onChange={handleChange}
-                className="px-2 py-2 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Commune</option>
-                <option value="Boeng Keng Kang 1">BKK1</option>
-              </select>
+                onChange={(next) => setField('commune', next)}
+                options={COMMUNE_OPTIONS}
+                placeholder="Commune"
+                ariaLabel="Commune"
+                triggerClassName="px-2 py-2 border-2 border-gray-300 rounded-lg text-xs bg-white"
+                placeholderClassName="text-slate-400"
+              />
             </div>
             <input
               type="text"

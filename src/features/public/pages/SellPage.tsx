@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SelectDropdown from '../../../components/common/SelectDropdown';
 import type { ChangeEvent, FormEvent } from 'react';
 import {
   AlertTriangle,
@@ -56,6 +57,12 @@ const HOW_IT_WORKS_STEPS = [
 
 export default function SellPage() {
   const { t } = useLanguage();
+  const POSITION_OPTIONS = [
+    { value: 'Seller', label: t('sell.formPositionSeller') },
+    { value: 'Agent', label: t('sell.formPositionAgent') },
+    { value: 'PROPERTY_OWNER', label: t('sell.formPositionOwner') },
+  ];
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -330,16 +337,13 @@ export default function SellPage() {
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-700 mb-1 block">{t('sell.formPosition')}</label>
-                  <select
-                    name="position"
+                  <SelectDropdown
                     value={formData.position}
-                    onChange={handleChange}
-                    className="w-full text-xs border border-gray-200 rounded-lg p-2.5 outline-none focus:border-blue-600 bg-transparent cursor-pointer"
-                  >
-                    <option value="Seller">{t('sell.formPositionSeller')}</option>
-                    <option value="Agent">{t('sell.formPositionAgent')}</option>
-                    <option value="PROPERTY_OWNER">{t('sell.formPositionOwner')}</option>
-                  </select>
+                    onChange={(next) => setFormData((prev) => ({ ...prev, position: next }))}
+                    options={POSITION_OPTIONS}
+                    ariaLabel={t('sell.formPosition')}
+                    triggerClassName="w-full text-xs border-2 border-gray-200 rounded-lg p-2.5 bg-transparent"
+                  />
                 </div>
               </div>
 

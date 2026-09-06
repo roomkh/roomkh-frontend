@@ -4,8 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'Kantumruy Pro', 'sans-serif'],
         km: ['Kantumruy Pro', 'sans-serif'],
+        heading: ['Plus Jakarta Sans', 'Koulen', 'sans-serif'],
       },
     },
   },

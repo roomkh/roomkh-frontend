@@ -28,7 +28,7 @@ import type {
 } from '../types';
 
 export const getHomeData = async (): Promise<HomeData> => {
-  return axiosInstance.get('/home');
+  return axiosInstance.get('/public/properties/home');
 };
 
 export const getProperties = async (filters: PropertyFilters = {}): Promise<ListResponse<PropertyCard>> => {
@@ -49,17 +49,43 @@ export const getProperties = async (filters: PropertyFilters = {}): Promise<List
   if (filters.province) params.province = filters.province;
   if (filters.district) params.district = filters.district;
 
-  return axiosInstance.get('/properties', { params });
+  return axiosInstance.get('/public/properties', { params });
+};
+
+/** The public list endpoint rejects any page size above this. */
+const MAX_PAGE_SIZE = 50;
+
+/**
+ * Pages through the public catalogue so pages that filter client-side (the
+ * search page) can see every listing instead of just the first page.
+ */
+export const getAllProperties = async (
+  filters: PropertyFilters = {},
+  maxItems = 300
+): Promise<PropertyCard[]> => {
+  const collected: PropertyCard[] = [];
+
+  for (let page = 1; collected.length < maxItems; page += 1) {
+    const data = await getProperties({ ...filters, page, size: MAX_PAGE_SIZE });
+    const list = (Array.isArray(data) ? data : data?.content ?? []) as PropertyCard[];
+    collected.push(...list);
+    if (list.length < MAX_PAGE_SIZE) break;
+  }
+
+  return collected.slice(0, maxItems);
 };
 
 export const getPropertyById = async (idOrSlug: string | number): Promise<{ property: Property }> =>
-  axiosInstance.get(`/properties/${idOrSlug}`);
+  axiosInstance.get(`/public/properties/${idOrSlug}`);
 
 export const getLocations = async (): Promise<Location[]> =>
-  axiosInstance.get('/locations');
+  axiosInstance.get('/public/properties/locations');
 
 export const getSimilarProperties = async (idOrSlug: string | number): Promise<PropertyCard[]> =>
-  axiosInstance.get(`/properties/${idOrSlug}/similar`);
+  axiosInstance.get(`/public/properties/${idOrSlug}/similar`);
+
+export const getOwnerProperties = async (idOrSlug: string | number): Promise<PropertyCard[]> =>
+  axiosInstance.get(`/public/properties/${idOrSlug}/owner-properties`);
 
 export const getHelpTopics = async (): Promise<HelpTopic[]> =>
   axiosInstance.get('/help/topics');
@@ -78,9 +104,9 @@ export const loginUser = async (credentials: {
   rememberMe?: boolean;
 }): Promise<AuthResponse> => {
   const payload = {
-    email: credentials.email,
+    identifier: credentials.email,
     password: credentials.password,
-    remember_me: credentials.rememberMe,
+    rememberMe: credentials.rememberMe,
   };
 
   const response = (await axiosInstance.post('/auth/login', payload)) as unknown as AuthResponse;
@@ -100,10 +126,8 @@ export const registerUser = async (userData: {
 }): Promise<AuthResponse> => {
   const payload = {
     full_name: userData.fullName,
-    email: userData.email,
+    identifier: userData.email,
     password: userData.password,
-    phone_number: userData.phone,
-    role: userData.role || 'USER',
     password_confirmation: userData.password,
   };
 

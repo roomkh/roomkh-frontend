@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import HomePageSkeleton from '../components/skeletons/HomePageSkeleton';
 import SellPageSkeleton from '../components/skeletons/SellPageSkeleton';
 import PropertyListPageSkeleton from '../components/skeletons/PropertyListPageSkeleton';
+import SearchPageSkeleton from '../components/skeletons/SearchPageSkeleton';
 import PropertyDetailSkeleton from '../components/skeletons/PropertyDetailSkeleton';
 import AboutPageSkeleton from '../components/skeletons/AboutPageSkeleton';
 import HelpPageSkeleton from '../components/skeletons/HelpPageSkeleton';
@@ -22,6 +23,7 @@ import UserGuard from './UserGuard';
 const HomePage = lazy(() => import('../features/public/pages/HomePage'));
 const SellPage = lazy(() => import('../features/public/pages/SellPage'));
 const PropertyListPage = lazy(() => import('../features/public/pages/PropertyListPage'));
+const SearchPage = lazy(() => import('../features/public/pages/SearchPage'));
 const PropertyDetailPage = lazy(() => import('../features/public/pages/PropertyDetailPage'));
 const AboutPage = lazy(() => import('../features/public/pages/AboutPage'));
 const HelpPage = lazy(() => import('../features/public/pages/HelpPage'));
@@ -71,7 +73,9 @@ export default function AppRoutes() {
           <Route path="/sell" element={withSkeleton(SellPage, SellPageSkeleton)} />
           <Route path="/buy" element={withSkeleton(PropertyListPage, PropertyListPageSkeleton)} />
           <Route path="/rent" element={withSkeleton(PropertyListPage, PropertyListPageSkeleton)} />
+          <Route path="/tourism" element={withSkeleton(PropertyListPage, PropertyListPageSkeleton)} />
           
+          <Route path="/search" element={withSkeleton(SearchPage, SearchPageSkeleton)} />
           <Route path="/properties" element={withSkeleton(PropertyListPage, PropertyListPageSkeleton)} />
           <Route path="/properties/:id" element={withSkeleton(PropertyDetailPage, PropertyDetailSkeleton)} />
           <Route path="/about" element={withSkeleton(AboutPage, AboutPageSkeleton)} />

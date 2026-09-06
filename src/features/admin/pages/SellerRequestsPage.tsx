@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import SelectDropdown from '../../../components/common/SelectDropdown';
 import { Search, CheckCircle2, XCircle, Eye, MessageSquare } from 'lucide-react';
 import { fetchAdminSellerRequests, reviewSellerRequestStatus } from '../services/adminService';
 import type { AdminSellerRequest } from '../../../types';
@@ -7,6 +8,13 @@ import Modal from '../../../components/ui/Modal';
 import ConfirmModal from '../../../components/admin/AdminModal';
 import Pagination from '../../../components/common/Pagination';
 import { useToast } from '../../../context/ToastContext';
+
+const STATUS_OPTIONS = [
+  { value: 'All Status', label: 'All Status' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Approved', label: 'Approved' },
+  { value: 'Rejected', label: 'Rejected' },
+];
 
 export default function SellerRequestsPage() {
   const [requests, setRequests] = useState<AdminSellerRequest[]>([]);
@@ -94,16 +102,14 @@ export default function SellerRequestsPage() {
             />
           </div>
 
-          <select
+          <SelectDropdown
             value={status}
-            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-            className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-          >
-            <option>All Status</option>
-            <option>Pending</option>
-            <option>Approved</option>
-            <option>Rejected</option>
-          </select>
+            onChange={(next) => { setStatus(next); setPage(1); }}
+            options={STATUS_OPTIONS}
+            align="right"
+            panelClassName="w-44"
+            triggerClassName="px-3 py-1.5 text-xs border-2 border-slate-200 rounded-lg bg-white text-slate-700"
+          />
         </div>
 
         <div className="overflow-x-auto">

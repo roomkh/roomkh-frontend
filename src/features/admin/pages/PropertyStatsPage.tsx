@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import SelectDropdown from '../../../components/common/SelectDropdown';
 import { BarChart3, TrendingUp, Home, CheckCircle2, Clock } from 'lucide-react';
 import { getAdminPropertiesStats, getAdminProperties } from '../../../service/api';
 import type { AdminPropertyStats, Property } from '../../../types';
@@ -6,6 +7,13 @@ import Button from '../../../components/ui/Button';
 import Modal from '../../../components/ui/Modal';
 import Pagination from '../../../components/common/Pagination';
 import { useToast } from '../../../context/ToastContext';
+
+const STATUS_OPTIONS = [
+  { value: 'All Status', label: 'All Status' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Inactive', label: 'Inactive' },
+];
 
 export default function PropertyStatsPage() {
   const [stats, setStats] = useState<AdminPropertyStats | null>(null);
@@ -61,16 +69,14 @@ export default function PropertyStatsPage() {
           <p className="text-xs text-slate-500 mt-0.5">Overview of listing health and distribution.</p>
         </div>
         <div className="flex items-center gap-2">
-          <select
+          <SelectDropdown
             value={status}
-            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-            className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-          >
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Pending</option>
-            <option>Inactive</option>
-          </select>
+            onChange={(next) => { setStatus(next); setPage(1); }}
+            options={STATUS_OPTIONS}
+            align="right"
+            panelClassName="w-44"
+            triggerClassName="px-3 py-1.5 text-xs border-2 border-slate-200 rounded-lg bg-white text-slate-700"
+          />
         </div>
       </div>
 
