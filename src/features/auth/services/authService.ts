@@ -33,7 +33,7 @@ const persistAuth = (response: AuthResponse): void => {
 
 export const loginUser = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   const payload = {
-    identifier: credentials.email,
+    email: credentials.email,
     password: credentials.password,
     rememberMe: credentials.rememberMe,
   };
@@ -46,7 +46,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthResp
 export const registerUser = async (userData: RegisterData): Promise<AuthResponse> => {
   const payload = {
     full_name: userData.fullName,
-    identifier: userData.email,
+    email: userData.email,
     password: userData.password,
     password_confirmation: userData.password,
   };

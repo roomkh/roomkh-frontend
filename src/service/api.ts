@@ -104,7 +104,7 @@ export const loginUser = async (credentials: {
   rememberMe?: boolean;
 }): Promise<AuthResponse> => {
   const payload = {
-    identifier: credentials.email,
+    email: credentials.email,
     password: credentials.password,
     rememberMe: credentials.rememberMe,
   };
@@ -126,7 +126,7 @@ export const registerUser = async (userData: {
 }): Promise<AuthResponse> => {
   const payload = {
     full_name: userData.fullName,
-    identifier: userData.email,
+    email: userData.email,
     password: userData.password,
     password_confirmation: userData.password,
   };
